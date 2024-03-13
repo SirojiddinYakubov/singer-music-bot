@@ -1,5 +1,5 @@
 import asyncio
-from bot.core import bot, dp
+from bot.core.conf import bot, dp
 from bot.handlers import main_handler
 
 async def main():

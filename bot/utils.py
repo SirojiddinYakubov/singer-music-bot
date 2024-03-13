@@ -1,6 +1,6 @@
 from aiogram import types
 from aiogram.exceptions import TelegramForbiddenError
-from bot.config import settings
+from bot.core.config import settings
 
 
 async def protect(func):
