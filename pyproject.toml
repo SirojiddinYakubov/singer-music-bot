@@ -7,10 +7,9 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-aiogram = "^3.4.1"
+aiogram = {extras = ["i18n"], version = "^3.4.1"}
 python-dotenv = "^1.0.1"
 pydantic-settings = "^2.2.1"
-fastapi-babel = "^0.0.9"
 
 
 [build-system]

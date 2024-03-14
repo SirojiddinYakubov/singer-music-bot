@@ -1,16 +1,16 @@
 from aiogram import Router
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message
-from bot.core.middleware import GetAcceptLanguageMiddleware
 from bot.filters import IsAdmin
-from bot.core.babel import _
+from aiogram.utils.i18n import gettext as _
 
 router = Router()
-router.message.middleware(GetAcceptLanguageMiddleware())
+
 
 @router.message(CommandStart())
 async def cmd_start(message: Message):
-    await message.answer(_("Assalomu aleykum {full_name}!").format(full_name=message.from_user.full_name))
+    await message.answer(_("Assalomu aleykum"))
+    # await message.answer(_("Assalomu aleykum {full_name}!").format(full_name=message.from_user.full_name))
 
 
 @router.message(Command("help"), IsAdmin())

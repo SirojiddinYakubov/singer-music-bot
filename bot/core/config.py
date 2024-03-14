@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     TOKEN_API: str | None = None
 
     @field_validator("TOKEN_API", check_fields=False)
-    def assemble_bot_token(cls, v: str, values: dict[str, Any]) -> list[str]:
+    def assemble_bot_token(cls, v: str, values: dict[str, Any]) -> str:
         return f"{values.data.get('BOT_API')}:{values.data.get('BOT_HASH')}"
 
     REDIS_HOST: str
