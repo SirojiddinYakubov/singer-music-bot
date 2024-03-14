@@ -19,3 +19,9 @@ update-locale:
 	pybabel update -i bot/locales/messages.pot -d bot/locales -D messages -l $(ARGS)
 compile-locale:
 	pybabel compile -d ./bot/locales -D messages
+alembic-init:
+	alembic init -t async alembic
+alembic-gen:
+	alembic revision --autogenerate -m "$(ARGS)"
+alembic-head:
+	alembic upgrade head

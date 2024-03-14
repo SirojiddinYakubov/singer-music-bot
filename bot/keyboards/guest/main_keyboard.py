@@ -2,7 +2,7 @@ from aiogram import types
 from aiogram.utils.i18n import gettext as _
 
 
-def menu_keyboard():
+def guest_menu_keyboard():
     kb = [
         [
             types.KeyboardButton(text=_("Qo'shiqlar ro'yhati 🎶")),

@@ -1,6 +1,6 @@
 import pathlib
 from typing import Any
-from pydantic import field_validator
+from pydantic import PostgresDsn, field_validator
 from pydantic_settings import BaseSettings
 
 BASE_DIR = pathlib.Path(__file__).parents[1]
@@ -22,6 +22,25 @@ class Settings(BaseSettings):
     REDIS_PORT: str | int
 
     ADMIN_ID: str | int
+    
+    DATABASE_PORT: int
+    DATABASE_PASSWORD: str
+    DATABASE_USER: str
+    DATABASE_NAME: str
+    DATABASE_HOST: str
+    
+    ASYNC_DATABASE_URI: str | None = None
+
+    @field_validator("ASYNC_DATABASE_URI", check_fields=False)
+    def assemble_async_database_uri(cls, v: str, values: dict[str, Any]) -> str:
+        return PostgresDsn.build(
+            scheme="postgresql+asyncpg",
+            username=values.data.get("DATABASE_USER"),
+            password=values.data.get("DATABASE_PASSWORD"),
+            host=values.data.get("DATABASE_HOST"),
+            port=int(values.data.get("DATABASE_PORT")),
+            path=f"{values.data.get('DATABASE_NAME') or ''}?prepared_statement_cache_size=0",
+        )
 
     class Config:
         env_file = ".env"
