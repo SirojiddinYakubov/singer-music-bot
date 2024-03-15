@@ -1,1 +1,1 @@
-from .user_model import *  # noqa
+from .common_model import *  # noqa
