@@ -15,5 +15,7 @@ class Music(BaseModel):
     title = db.Column(db.String(100), nullable=False)
     duration = db.Column(db.Integer, nullable=False)
     file_id = db.Column(db.String(100), nullable=False)
+    path = db.Column(db.String(100), nullable=False)
     size = db.Column(db.Integer, nullable=False)
     mime_type = db.Column(db.String(100), nullable=False)
+    created_by = db.Column(db.Integer, nullable=False)

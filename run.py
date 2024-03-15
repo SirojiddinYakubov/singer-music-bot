@@ -2,13 +2,10 @@ import asyncio
 
 from bot.core.conf import bot, dp
 from bot.core.middleware import register_middlewares
-from bot.handlers import main_handler
 
 
 async def main():
     print("Бот запущен")
-    dp.include_routers(main_handler.router)
-
     register_middlewares(dp)
 
     await bot.delete_webhook(drop_pending_updates=True)
