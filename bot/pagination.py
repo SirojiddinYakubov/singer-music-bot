@@ -79,3 +79,9 @@ def _calculate_num_pages(page_number, page_size, total_results):
         return 0
 
     return math.ceil(float(total_results) / float(page_size))
+
+def calculate_start(page_number: int, page_size: int) -> int:
+    if page_number > 1:
+        return (page_number - 1) * page_size + 1  
+    else: 
+        return 1

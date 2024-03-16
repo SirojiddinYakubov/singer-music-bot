@@ -42,6 +42,8 @@ class Settings(BaseSettings):
             path=f"{values.data.get('DATABASE_NAME') or ''}?prepared_statement_cache_size=0",
         )
 
+    PAGE_SIZE: int = 3
+    
     class Config:
         env_file = ".env"
 
