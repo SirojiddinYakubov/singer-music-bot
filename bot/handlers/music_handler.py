@@ -7,9 +7,8 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.handlers.base_handler import BaseHandler
-from bot.keyboards.guest.main_keyboard import guest_menu_keyboard
-from bot.keyboards.admin.main_keyboard import admin_menu_keyboard
+from bot.keyboards.guest.main_keyboard import guest_menu_kb
+from bot.keyboards.admin.main_keyboard import admin_menu_kb
 from bot.core.config import settings
 from bot.models import Music
 from bot.pagination import apply_pagination

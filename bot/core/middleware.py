@@ -1,16 +1,13 @@
-from aiogram import Dispatcher
-from aiogram.utils.i18n import I18n, ConstI18nMiddleware
-from typing import Callable, Awaitable, Dict, Any
-
+from aiogram import Dispatcher, types
+from aiogram.utils.i18n import I18n, SimpleI18nMiddleware
+from typing import Callable, Awaitable, Dict, Any, Optional
+from babel import Locale
 from aiogram import BaseMiddleware
 from aiogram.types import TelegramObject
 from sqlalchemy.ext.asyncio import async_sessionmaker
-
-from bot.core.db import sessionmaker
-
-i18n = I18n(path="bot/locales", default_locale="uz", domain="messages")
-i18n_middleware = ConstI18nMiddleware(i18n=i18n, locale="ru")
-
+from sqlalchemy import select
+from bot.models import User
+from bot.core.db import async_session
 
 class DbSessionMiddleware(BaseMiddleware):
     def __init__(self, session_pool: async_sessionmaker):
@@ -28,6 +25,31 @@ class DbSessionMiddleware(BaseMiddleware):
             return await handler(event, data)
 
 
+i18n = I18n(path="bot/locales", default_locale="uz", domain="messages")
+
+class Localization(SimpleI18nMiddleware):
+      async def get_locale(self, event: TelegramObject, data: Dict[str, Any]) -> str:
+        if Locale is None:  # pragma: no cover
+            raise RuntimeError(
+                f"{type(self).__name__} can be used only when Babel installed\n"
+                "Just install Babel (`pip install Babel`) "
+                "or aiogram with i18n support (`pip install aiogram[i18n]`)"
+            )
+        event_from_user: Optional[types.User] = data.get("event_from_user", None)
+        if event_from_user is None:
+            return "uz"
+        async with async_session() as session:
+            db_user = await session.execute(select(User).where(User.id == event_from_user.id))
+            db_user = db_user.scalar_one_or_none()
+            print(41, db_user)
+            if db_user:
+                return db_user.lang_code
+        return "uz"
+    
+i18n_middleware = Localization(i18n=i18n)
+
+
 def register_middlewares(dp: Dispatcher):
+    dp.update.middleware(DbSessionMiddleware(session_pool=async_session))
     dp.update.outer_middleware(i18n_middleware)
-    dp.update.middleware(DbSessionMiddleware(session_pool=sessionmaker))
+

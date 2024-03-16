@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-03-14 15:05+0500\n"
+"POT-Creation-Date: 2024-03-16 12:00+0500\n"
 "PO-Revision-Date: 2024-03-14 15:06+0500\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ru\n"
@@ -19,7 +19,42 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.13.1\n"
 
-#: bot/handlers/main_handler.py:12
-msgid "Assalomu aleykum"
-msgstr "Здравствуйте"
+#: bot/handlers/main_handler.py:28
+msgid "Assalomu aleykum ADMIN"
+msgstr "Здравствуйте Админ"
+
+#: bot/handlers/main_handler.py:32
+msgid "Assalomu aleykum {full_name}!"
+msgstr "Здравствуйте {full_name}!"
+
+#: bot/handlers/main_handler.py:48
+msgid "Til muvaffaqiyatli sozlandi!"
+msgstr "Язык успешно установлен!"
+
+#: bot/handlers/main_handler.py:70
+msgid "Musiqa muvaffaqiyatli yuklandi!"
+msgstr ""
+
+#: bot/keyboards/admin/main_keyboard.py:8
+#: bot/keyboards/guest/main_keyboard.py:10
+msgid "Qo'shiqlar ro'yhati 🎶"
+msgstr ""
+
+#: bot/keyboards/admin/main_keyboard.py:11
+#: bot/keyboards/guest/main_keyboard.py:11
+msgid "Qo'shiq izlash 🔎"
+msgstr ""
+
+#: bot/keyboards/admin/main_keyboard.py:14
+msgid "Qo'shiq qo'shish "
+msgstr ""
+
+#: bot/keyboards/admin/main_keyboard.py:17
+msgid "Sotib olingan qo'shiqlar ro'yhati"
+msgstr ""
+
+#: bot/keyboards/admin/main_keyboard.py:23
+#: bot/keyboards/guest/main_keyboard.py:17
+msgid "Kerakli amalni tanlang"
+msgstr ""
 

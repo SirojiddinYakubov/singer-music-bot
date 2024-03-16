@@ -3,10 +3,10 @@ from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.i18n import gettext as _
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from bot.handlers.base_handler import BaseHandler
-from bot.keyboards.guest.main_keyboard import guest_menu_keyboard
-from bot.keyboards.admin.main_keyboard import admin_menu_keyboard
+from bot.callbacks import LangCallbackFactory
+from bot.helpers.main_helper import detect_user_language, set_user_language
+from bot.keyboards.guest.main_keyboard import guest_menu_kb, ask_lang_code_kb
+from bot.keyboards.admin.main_keyboard import admin_menu_kb
 from bot.core.config import settings
 from bot.models import Music
 from bot.utils import get_file_path
@@ -15,28 +15,61 @@ router = Router()
 
 
 @router.message(CommandStart())
-async def start_command(message: types.Message, session: AsyncSession, state: FSMContext):
-    print(session)
-    if message.from_user.id == int(settings.ADMIN_ID):
-        await message.answer(_("Assalomu aleykum ADMIN"), reply_markup=admin_menu_keyboard())
+async def start_command(
+    message: types.Message, session: AsyncSession, state: FSMContext
+):
+    lang_code = await detect_user_language(message.from_user, session)
+    if not lang_code:
+        return await message.answer(
+            "Tilni tanlang:\nВыберите язык:", reply_markup=ask_lang_code_kb()
+        )
+    if message.from_user.id in settings.ADMIN_IDS:
+        await message.answer(
+            _("Assalomu aleykum ADMIN"), reply_markup=admin_menu_kb()
+        )
     else:
-        await message.answer(_("Assalomu aleykum {full_name}!").format(full_name=message.from_user.full_name),
-                             reply_markup=guest_menu_keyboard())
+        await message.answer(
+            _("Assalomu aleykum {full_name}!").format(
+                full_name=message.from_user.full_name
+            ),
+            reply_markup=guest_menu_kb(),
+        )
+
+
+@router.callback_query(LangCallbackFactory.filter())
+async def set_user_lang_callback(
+    callback: types.CallbackQuery,
+    callback_data: LangCallbackFactory,
+    session: AsyncSession,
+):
+    if callback_data.action == "set":
+        lang_code = callback_data.value
+        await set_user_language(callback.from_user, lang_code, session)
+        await callback.message.delete()
+        await callback.message.answer(
+            "Til muvaffaqiyatli sozlandi!/Язык успешно установлен!"
+        )
+    else:
+        await callback.message.answer(
+            "Tilni tanlang:\nВыберите язык:", reply_markup=ask_lang_code_kb()
+        )
+    await callback.answer()
 
 
 @router.message(F.audio)
-async def upload_music(message: types.Message, session: AsyncSession, state: FSMContext):
+async def upload_music(
+    message: types.Message, session: AsyncSession, state: FSMContext
+):
     path = await get_file_path(message.audio.file_id)
     music = Music(
-        created_by=message.from_user.id,
+        created_by_id=message.from_user.id,
         duration=message.audio.duration,
         file_id=message.audio.file_id,
         size=message.audio.file_size,
         mime_type=message.audio.mime_type,
         title=message.audio.file_name,
-        path=path
+        path=path,
     )
     session.add(music)
     await session.commit()
     await message.reply(_("Musiqa muvaffaqiyatli yuklandi!"))
-

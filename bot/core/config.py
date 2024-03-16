@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     REDIS_HOST: str
     REDIS_PORT: str | int
 
-    ADMIN_ID: str | int
+    ADMIN_IDS: list[int] = [183551053]
     
     DATABASE_PORT: int
     DATABASE_PASSWORD: str

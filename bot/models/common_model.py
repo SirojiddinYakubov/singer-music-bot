@@ -3,8 +3,10 @@ import sqlalchemy as db
 
 
 class User(BaseModel):
-    telegram_id = db.Column(db.Integer, primary_key=True)
-
+    id = db.Column(db.BigInteger, primary_key=True)
+    full_name = db.Column(db.String(100), nullable=False)
+    username = db.Column(db.String(100), nullable=True)
+    lang_code = db.Column(db.String(5), nullable=False)
 
 # class Singer(BaseModel):
 #     first_name = db.Column(db.String(100), nullable=False)
@@ -18,4 +20,4 @@ class Music(BaseModel):
     path = db.Column(db.String(100), nullable=False)
     size = db.Column(db.Integer, nullable=False)
     mime_type = db.Column(db.String(100), nullable=False)
-    created_by = db.Column(db.Integer, nullable=False)
+    created_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
