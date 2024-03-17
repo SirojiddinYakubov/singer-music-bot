@@ -10,6 +10,7 @@ from bot.models import User
 from bot.core.db import async_session
 
 
+
 class DbSessionMiddleware(BaseMiddleware):
     def __init__(self, session_pool: async_sessionmaker):
         super().__init__()
@@ -55,5 +56,6 @@ i18n_middleware = Localization(i18n=i18n)
 
 
 def register_middlewares(dp: Dispatcher):
+    # dp.update.middleware(LoggingMiddleware())
     dp.update.middleware(DbSessionMiddleware(session_pool=async_session))
     dp.update.outer_middleware(i18n_middleware)

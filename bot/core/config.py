@@ -21,14 +21,14 @@ class Settings(BaseSettings):
     REDIS_HOST: str
     REDIS_PORT: str | int
 
-    ADMIN_IDS: list[int] = [183551053]
-    
+    ADMIN_IDS: list[int] = [183551052]
+
     DATABASE_PORT: int
     DATABASE_PASSWORD: str
     DATABASE_USER: str
     DATABASE_NAME: str
     DATABASE_HOST: str
-    
+
     ASYNC_DATABASE_URI: str | None = None
 
     @field_validator("ASYNC_DATABASE_URI", check_fields=False)
@@ -43,7 +43,7 @@ class Settings(BaseSettings):
         )
 
     PAGE_SIZE: int = 3
-    
+
     class Config:
         env_file = ".env"
 

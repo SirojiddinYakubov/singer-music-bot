@@ -56,20 +56,4 @@ async def set_user_lang_callback(
     await callback.answer()
 
 
-@router.message(F.audio)
-async def upload_music(
-    message: types.Message, session: AsyncSession, state: FSMContext
-):
-    path = await get_file_path(message.audio.file_id)
-    music = Music(
-        created_by_id=message.from_user.id,
-        duration=message.audio.duration,
-        file_id=message.audio.file_id,
-        size=message.audio.file_size,
-        mime_type=message.audio.mime_type,
-        title=message.audio.file_name,
-        path=path,
-    )
-    session.add(music)
-    await session.commit()
-    await message.reply(_("Musiqa muvaffaqiyatli yuklandi!"))
+

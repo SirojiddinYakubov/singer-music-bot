@@ -13,3 +13,7 @@ class PaginatedMusicsCallbackFactory(CallbackData, prefix="page"):
     num_pages: int | None = None
     total_results: int | None = None
     value: int | None = None
+    
+class MusicActionCallbackFactory(CallbackData, prefix="music"):
+    action: str
+    value: int | None = None
