@@ -5,30 +5,33 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from bot.callbacks import LangCallbackFactory, PaginatedMusicsCallbackFactory
 from bot.pagination import calculate_start
 
+
 def guest_menu_kb():
     kb = [
         [
-            types.KeyboardButton(text=_("Qo'shiqlar ro'yhati 🎶")),
-            types.KeyboardButton(text=_("Qo'shiq izlash 🔎"))
+            types.KeyboardButton(text=_("🎶 Sotib olingan qo'shiqlar")),
+        ],
+        [
+            types.KeyboardButton(text=_("⚙️ Sozlamalar ")),
         ],
     ]
     return types.ReplyKeyboardMarkup(
         keyboard=kb,
         resize_keyboard=True,
-        input_field_placeholder=_("Kerakli amalni tanlang")
+        input_field_placeholder=_("Kerakli amalni tanlang"),
     )
 
 
 def ask_lang_code_kb():
     builder = InlineKeyboardBuilder()
     builder.button(
-        text="O'zbek tili 🇺🇿", callback_data=LangCallbackFactory(action="set", value="uz")
+        text="🇺🇿 O'zbek tili",
+        callback_data=LangCallbackFactory(action="set", value="uz"),
     )
     builder.button(
-        text="Rus tili 🇷🇺", callback_data=LangCallbackFactory(action="set", value="ru")
+        text="🇷🇺 Rus tili", callback_data=LangCallbackFactory(action="set", value="ru")
     )
     return builder.as_markup()
-
 
 
 # async def paginated_musics_kb(query, pagination, session):
@@ -49,9 +52,7 @@ def ask_lang_code_kb():
 #     if pagination["page_number"] < pagination["num_pages"]:
 #         builder.button(
 #             text="next", callback_data=PaginatedMusicsCallbackFactory(action="next", **pagination)
-#         )   
-        
+#         )
+
 #     builder.adjust(2)
 #     return builder.as_markup()
-
-

@@ -28,10 +28,13 @@ async def start_command(
             _("Assalomu aleykum ADMIN"), reply_markup=admin_menu_kb()
         )
     else:
+        text = _("""
+        Assalomu aleykum {full_name}!\n\nQidiruvni amalga oshirish uchun qo'shiq nomi yoki qo'shiqchi nomini kiriting
+        """).format(
+            full_name=message.from_user.full_name
+        )
         await message.answer(
-            _("Assalomu aleykum {full_name}!").format(
-                full_name=message.from_user.full_name
-            ),
+            text,
             reply_markup=guest_menu_kb(),
         )
 
@@ -47,7 +50,7 @@ async def set_user_lang_callback(
         await set_user_language(callback.from_user, lang_code, session)
         await callback.message.delete()
         await callback.message.answer(
-            "Til muvaffaqiyatli sozlandi!/Язык успешно установлен!"
+            "Til muvaffaqiyatli sozlandi!/Язык успешно установлен!\n\nQidiruvni amalga oshirish uchun qo'shiq nomi yoki qo'shiqchi nomini kiriting/Введите название песни или имя исполнителя",
         )
     else:
         await callback.message.answer(

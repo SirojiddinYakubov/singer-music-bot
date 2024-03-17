@@ -6,18 +6,14 @@ from bot.callbacks import MusicActionCallbackFactory
 
 def admin_menu_kb():
     kb = [
+        [types.KeyboardButton(text=_("🎶 Qo'shiqlar ro'yhati"))],
+        [types.KeyboardButton(text=_("🔎 Qo'shiq izlash"))],
         [
-            types.KeyboardButton(text=_("Qo'shiqlar ro'yhati 🎶"))
+            types.KeyboardButton(text=_("➕ Qo'shiq qo'shish")),
         ],
-        [
-            types.KeyboardButton(text=_("Qo'shiq izlash 🔎"))    
-        ],
-        [
-            types.KeyboardButton(text=_("Qo'shiq qo'shish ➕")),
-        ],
-        [
-            types.KeyboardButton(text=_("Sotib olingan qo'shiqlar ro'yhati 🎵")),
-        ]
+        # [
+        #     types.KeyboardButton(text=_("Sotib olingan qo'shiqlar ro'yhati 🎵")),
+        # ]
     ]
     return types.ReplyKeyboardMarkup(
         keyboard=kb,
@@ -29,8 +25,18 @@ def admin_menu_kb():
 async def admin_action_music_ikb(music_id: int):
     buttons = [
         [
-            types.InlineKeyboardButton(text=_("Yuklab olish 🎧"), callback_data=MusicActionCallbackFactory(action="download", value=music_id).pack()),
-            types.InlineKeyboardButton(text=_("O'chirish ❌"), callback_data=MusicActionCallbackFactory(action="delete", value=music_id).pack()),
+            types.InlineKeyboardButton(
+                text=_("🎧 Yuklab olish"),
+                callback_data=MusicActionCallbackFactory(
+                    action="download", value=music_id
+                ).pack(),
+            ),
+            types.InlineKeyboardButton(
+                text=_("❌ O'chirish"),
+                callback_data=MusicActionCallbackFactory(
+                    action="delete", value=music_id
+                ).pack(),
+            ),
         ]
     ]
     keyboard = types.InlineKeyboardMarkup(inline_keyboard=buttons)
