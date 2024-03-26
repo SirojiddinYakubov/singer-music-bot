@@ -12,7 +12,7 @@ help:
 hello:
 	echo "Hello, World"
 extract-locale:
-    pybabel extract -k __ --input-dirs=./bot -o bot/locales/messages.pot
+	pybabel extract -k __ --input-dirs=./bot -o bot/locales/messages.pot
 init-locale:
 	pybabel init -i ./bot/locales/messages.pot -d ./bot/locales -D messages -l $(ARGS)
 update-locale:

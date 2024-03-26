@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-03-16 12:00+0500\n"
+"POT-Creation-Date: 2024-03-26 10:34+0500\n"
 "PO-Revision-Date: 2024-03-14 15:06+0500\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ru\n"
@@ -19,42 +19,107 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.13.1\n"
 
-#: bot/handlers/main_handler.py:28
-msgid "Assalomu aleykum ADMIN"
-msgstr "Здравствуйте Админ"
+#: bot/handlers/admin_music_handler.py:23
+#: bot/keyboards/admin/main_keyboard.py:9
+msgid "🎶 Qo'shiqlar ro'yhati"
+msgstr ""
 
-#: bot/handlers/main_handler.py:32
-msgid "Assalomu aleykum {full_name}!"
-msgstr "Здравствуйте {full_name}!"
+#: bot/handlers/admin_music_handler.py:108
+#: bot/handlers/admin_music_handler.py:196
+msgid "Musiqa topilmadi!"
+msgstr ""
 
-#: bot/handlers/main_handler.py:48
-msgid "Til muvaffaqiyatli sozlandi!"
-msgstr "Язык успешно установлен!"
+#: bot/handlers/admin_music_handler.py:112
+#: bot/keyboards/admin/main_keyboard.py:10
+msgid "🔎 Qo'shiq izlash"
+msgstr ""
 
-#: bot/handlers/main_handler.py:70
+#: bot/handlers/admin_music_handler.py:115
+msgid "Qo'shiq yoki qo'shiqchi nomini kiriting!"
+msgstr ""
+
+#: bot/handlers/admin_music_handler.py:140
+#: bot/handlers/guest_music_handler.py:40
+msgid "{searched_text} bo'yicha qidiruvda hech qanday musiqa topilmadi!"
+msgstr ""
+
+#: bot/handlers/admin_music_handler.py:146
+#: bot/keyboards/admin/main_keyboard.py:12
+msgid "➕ Qo'shiq qo'shish"
+msgstr ""
+
+#: bot/handlers/admin_music_handler.py:149
+msgid "Audio faylni yuklang!"
+msgstr ""
+
+#: bot/handlers/admin_music_handler.py:170
 msgid "Musiqa muvaffaqiyatli yuklandi!"
 msgstr ""
 
-#: bot/keyboards/admin/main_keyboard.py:8
-#: bot/keyboards/guest/main_keyboard.py:10
-msgid "Qo'shiqlar ro'yhati 🎶"
+#: bot/handlers/admin_music_handler.py:219
+#, fuzzy
+msgid "{music_title} muvaffaqiyatli o'chirildi!"
+msgstr "Язык успешно установлен!"
+
+#: bot/handlers/guest_music_handler.py:102
+msgid "Qo'shiqni yuklab olish uchun avval to'lovni amalga oshiring!"
 msgstr ""
 
-#: bot/keyboards/admin/main_keyboard.py:11
-#: bot/keyboards/guest/main_keyboard.py:11
-msgid "Qo'shiq izlash 🔎"
+#: bot/handlers/main_handler.py:27
+msgid "Assalomu aleykum ADMIN"
+msgstr "Здравствуйте Админ"
+
+#: bot/handlers/main_handler.py:30
+msgid ""
+"\n"
+"        Assalomu aleykum {full_name}!\n"
+"\n"
+"Qidiruvni amalga oshirish uchun qo'shiq nomi yoki qo'shiqchi nomini "
+"kiriting\n"
+"        "
 msgstr ""
 
-#: bot/keyboards/admin/main_keyboard.py:14
-msgid "Qo'shiq qo'shish "
+#: bot/keyboards/base_keyboard.py:21
+msgid "◀️ oldingi"
 msgstr ""
 
-#: bot/keyboards/admin/main_keyboard.py:17
-msgid "Sotib olingan qo'shiqlar ro'yhati"
+#: bot/keyboards/base_keyboard.py:25
+msgid "▶️ keyingi"
 msgstr ""
 
-#: bot/keyboards/admin/main_keyboard.py:23
-#: bot/keyboards/guest/main_keyboard.py:17
+#: bot/keyboards/admin/main_keyboard.py:21
+#: bot/keyboards/guest/main_keyboard.py:21
 msgid "Kerakli amalni tanlang"
 msgstr ""
+
+#: bot/keyboards/admin/main_keyboard.py:29
+msgid "🎧 Yuklab olish"
+msgstr ""
+
+#: bot/keyboards/admin/main_keyboard.py:35
+msgid "❌ O'chirish"
+msgstr ""
+
+#: bot/keyboards/guest/main_keyboard.py:12
+msgid "🎶 Sotib olingan qo'shiqlar"
+msgstr ""
+
+#: bot/keyboards/guest/main_keyboard.py:15
+msgid "⚙️ Sozlamalar "
+msgstr ""
+
+#~ msgid "Assalomu aleykum {full_name}!"
+#~ msgstr "Здравствуйте {full_name}!"
+
+#~ msgid "Qo'shiqlar ro'yhati 🎶"
+#~ msgstr ""
+
+#~ msgid "Qo'shiq izlash 🔎"
+#~ msgstr ""
+
+#~ msgid "Qo'shiq qo'shish "
+#~ msgstr ""
+
+#~ msgid "Sotib olingan qo'shiqlar ro'yhati"
+#~ msgstr ""
 
