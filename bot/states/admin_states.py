@@ -5,3 +5,4 @@ class SearchMusicState(StatesGroup):
     
 class AddMusicState(StatesGroup):
     audio = State()
+    price = State()

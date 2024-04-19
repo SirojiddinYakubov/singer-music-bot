@@ -4,7 +4,7 @@ from aiogram import Router, types, F
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.i18n import gettext as _
 from aiogram.utils.i18n import lazy_gettext as __
-from sqlalchemy import desc, select
+from sqlalchemy import desc, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot.callbacks import MusicActionCallbackFactory, PaginatedMusicsCallbackFactory
@@ -24,14 +24,19 @@ router = Router()
 async def admin_musics_list(
         message: types.Message, session: AsyncSession, state: FSMContext
 ):
+    await state.clear()
     query = select(Music).order_by(desc(Music.created_at))
     query, pagination = await apply_pagination(
         query, session, page_size=settings.PAGE_SIZE, page_number=1
     )
     response = await session.execute(query)
-    text = ""
-    for i, music in enumerate(response.scalars().all(), start=1):
-        text += f"{i}. {music.title}\n"
+    musics = response.scalars().all()
+    if len(musics):
+        text = ""
+        for i, music in enumerate(musics, start=1):
+            text += f"{i}. {music.title}\n"
+    else:
+        text = _("Qo'shiq topilmadi!")
     await message.reply(
         text, reply_markup=await paginated_musics_ikb(query, pagination, session)
     )
@@ -98,7 +103,7 @@ async def admin_callbacks_for_music(
     db_music = response.scalar_one_or_none()
     if db_music:
         text = ""
-        for col in ["title", "id", "duration", "size", "mime_type", "created_at", "created_by"]:
+        for col in ["title", "id", "duration", "price", "size", "mime_type", "created_at", "created_by"]:
             if col == "size":
                 text += f"{col}: {size_representation(db_music.size)}\n"
                 continue
@@ -153,7 +158,7 @@ async def admin_add_music(message: types.Message, state: FSMContext):
 async def admin_upload_music(
         message: types.Message, session: AsyncSession, state: FSMContext
 ):
-    await state.clear()
+    await state.set_state(AddMusicState.price)
 
     path = await get_file_path(message.audio.file_id)
     music = Music(
@@ -167,7 +172,37 @@ async def admin_upload_music(
     )
     session.add(music)
     await session.commit()
+
+    await state.update_data(last_music_id=music.id)
+    await message.reply(_("Musiqa muvaffaqiyatli yuklandi! Endi musiqa narxini UZS'da kiriting: Masalan: 200000"))
+
+
+@router.message(AddMusicState.price, F.text.isdigit(), IsAdmin())
+async def admin_set_music_price(
+        message: types.Message, session: AsyncSession, state: FSMContext
+):
+    data = await state.get_data()
+    last_music_id = data.get("last_music_id", None)
+    await state.clear()
+
+    if not last_music_id:
+        return await message.reply(_("Oldin yuklangan musiqa topilmadi!"))
+
+    query = (
+        update(Music)
+        .where(Music.id == int(last_music_id))
+        .values(price=int(message.text))
+    )
+    await session.execute(query)
+    await session.commit()
     await message.reply(_("Musiqa muvaffaqiyatli yuklandi!"))
+
+
+@router.message(AddMusicState.price, ~F.text.isdigit(), IsAdmin())
+async def admin_set_music_price(
+        message: types.Message, session: AsyncSession, state: FSMContext
+):
+    await message.reply(_("Narx kiritishda xatolik! Quyidagi formatda kiriting: Masalan: 200000"))
 
 
 @router.callback_query(

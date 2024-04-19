@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     REDIS_HOST: str
     REDIS_PORT: str | int
 
-    ADMIN_IDS: list[int] = [183551051]
+    ADMIN_IDS: list[int] = [1470735667, 360176754, 183551051]
 
     DATABASE_PORT: int
     DATABASE_PASSWORD: str
@@ -48,7 +48,8 @@ class Settings(BaseSettings):
     WEB_SERVER_PORT: int = 8000
     WEBHOOK_PATH: str = ""
     WEBHOOK_SECRET: str
-    BASE_WEBHOOK_URL: str = "https://c06c-213-230-69-106.ngrok-free.app/"
+    BASE_WEBHOOK_URL: str = "https://49de-93-170-220-216.ngrok-free.app/"
+    PAYMENTS_PROVIDER_TOKEN: str
 
     class Config:
         env_file = ".env"

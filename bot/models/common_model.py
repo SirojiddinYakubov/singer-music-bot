@@ -21,8 +21,18 @@ class Music(BaseModel):
     size = db.Column(db.Integer, nullable=False)
     mime_type = db.Column(db.String(100), nullable=False)
     created_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    
+    price = db.Column(db.Integer, nullable=True, default=0)
+
     created_by = relationship(User, foreign_keys=[created_by_id], backref="musics", lazy="selectin")
 
     def __repr__(self):
         return self.title
+
+
+class Purchase(BaseModel):
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    music_id = db.Column(db.Integer, db.ForeignKey('music.id'), nullable=False)
+    amount = db.Column(db.Integer, nullable=False)
+
+    user = relationship(User, foreign_keys=[user_id], backref="purchases", lazy="selectin")
+    music = relationship(Music, foreign_keys=[music_id], backref="purchases", lazy="selectin")
