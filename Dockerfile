@@ -14,9 +14,12 @@ RUN curl -sSL https://install.python-poetry.org | POETRY_HOME=/opt/poetry python
 
 COPY pyproject.toml poetry.lock* /
 
-RUN poetry install
+
 
 WORKDIR /aiogram_bot
 COPY . /aiogram_bot/
+
+RUN poetry install
+RUN pybabel compile -d ./bot/locales -D messages
 
 ENTRYPOINT ["/bin/bash", "-c", "alembic upgrade head && python run.py"]
