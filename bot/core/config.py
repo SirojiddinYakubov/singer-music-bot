@@ -48,7 +48,7 @@ class Settings(BaseSettings):
     WEB_SERVER_PORT: int = 8000
     WEBHOOK_PATH: str = ""
     WEBHOOK_SECRET: str
-    BASE_WEBHOOK_URL: str = "https://49de-93-170-220-216.ngrok-free.app/"
+    BASE_WEBHOOK_URL: str = "https://bahtiyorrahmanov.uz/"
     PAYMENTS_PROVIDER_TOKEN: str
 
     class Config:

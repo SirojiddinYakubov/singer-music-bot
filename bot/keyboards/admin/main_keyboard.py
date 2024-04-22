@@ -14,6 +14,9 @@ def admin_menu_kb():
         # [
         #     types.KeyboardButton(text=_("Sotib olingan qo'shiqlar ro'yhati 🎵")),
         # ]
+        [
+            types.KeyboardButton(text=_("🌐 Tilni sozlash")),
+        ],
     ]
     return types.ReplyKeyboardMarkup(
         keyboard=kb,

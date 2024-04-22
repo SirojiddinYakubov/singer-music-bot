@@ -1,7 +1,8 @@
-from aiogram import Router, types
-from aiogram.filters import CommandStart
+from aiogram import Router, types, F
+from aiogram.filters import CommandStart, or_f
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.i18n import gettext as _
+from aiogram.utils.i18n import lazy_gettext as __
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot.callbacks import LangCallbackFactory
@@ -38,7 +39,7 @@ async def start_command(
         )
 
 
-@router.callback_query(LangCallbackFactory.filter())
+@router.callback_query(or_f(F.text == __("🌐 Tilni sozlash"), LangCallbackFactory.filter()))
 async def set_user_lang_callback(
         callback: types.CallbackQuery,
         callback_data: LangCallbackFactory,
