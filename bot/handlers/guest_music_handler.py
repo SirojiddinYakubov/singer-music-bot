@@ -1,50 +1,98 @@
 import sys
-
-from aiogram import Router, types, F
 from aiogram import Router, types, F
 from aiogram.enums import ContentType
+from aiogram.filters import Command, or_f
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.i18n import gettext as _
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from aiogram.utils.i18n import lazy_gettext as __
 from bot.callbacks import PaginatedMusicsCallbackFactory, PaymentInfoFactory
 from bot.core.config import settings
 from bot.filters import IsAdmin
 from bot.keyboards.base_keyboard import paginated_musics_ikb
-from bot.models import Music, Purchase
+from bot.models import Music, Purchase, User
 from bot.pagination import apply_pagination, calculate_start
 from bot.utils import handle_error
 
 router = Router()
 
 
-@router.message(F.text, ~IsAdmin())
-async def admin_search_music_result(
+@router.message(or_f(F.text == __("🎶 Qo'shiqlar ro'yhati"), Command('musics')), ~IsAdmin())
+async def admin_musics_list(
         message: types.Message, session: AsyncSession, state: FSMContext
 ):
+    await state.clear()
+    query = select(Music).order_by(desc(Music.created_at))
+    query, pagination = await apply_pagination(
+        query, session, page_size=settings.PAGE_SIZE, page_number=1
+    )
+    response = await session.execute(query)
+    musics = response.scalars().all()
+    if len(musics):
+        text = ""
+        for i, music in enumerate(musics, start=1):
+            text += f"{i}. {music.title}\n"
+    else:
+        text = _("Qo'shiq topilmadi!")
+    await message.reply(
+        text, reply_markup=await paginated_musics_ikb(query, pagination, session)
+    )
+
+
+@router.message(F.text == __("🎵 Sotib olingan qo'shiqlar"), ~IsAdmin())
+async def guest_purchase_list(
+        message: types.Message, session: AsyncSession, state: FSMContext
+):
+    await state.clear()
     query = (
         select(Music)
-        .filter(Music.title.ilike(f"%{message.text.lower()}%"))
+        .join(Purchase, Purchase.music_id == Music.id)
+        .filter(Purchase.user_id == message.from_user.id, Purchase.music_id == Music.id)
         .order_by(desc(Music.created_at))
     )
     query, pagination = await apply_pagination(
         query, session, page_size=settings.PAGE_SIZE, page_number=1
     )
     response = await session.execute(query)
-
-    await state.update_data(searched_text=message.text)
-
     musics = response.scalars().all()
     if len(musics):
-        text = f"🔍 {message.text}\n\n"
+        text = ""
         for i, music in enumerate(musics, start=1):
             text += f"{i}. {music.title}\n"
     else:
-        text = _("{searched_text} bo'yicha qidiruvda hech qanday musiqa topilmadi!").format(searched_text=message.text)
+        text = _("Qo'shiq topilmadi!")
     await message.reply(
         text, reply_markup=await paginated_musics_ikb(query, pagination, session)
     )
+
+
+# @router.message(F.text, ~IsAdmin())
+# async def admin_search_music_result(
+#         message: types.Message, session: AsyncSession, state: FSMContext
+# ):
+#     query = (
+#         select(Music)
+#         .filter(Music.title.ilike(f"%{message.text.lower()}%"))
+#         .order_by(desc(Music.created_at))
+#     )
+#     query, pagination = await apply_pagination(
+#         query, session, page_size=settings.PAGE_SIZE, page_number=1
+#     )
+#     response = await session.execute(query)
+#
+#     await state.update_data(searched_text=message.text)
+#
+#     musics = response.scalars().all()
+#     if len(musics):
+#         text = f"🔍 {message.text}\n\n"
+#         for i, music in enumerate(musics, start=1):
+#             text += f"{i}. {music.title}\n"
+#     else:
+#         text = _("{searched_text} bo'yicha qidiruvda hech qanday musiqa topilmadi!").format(searched_text=message.text)
+#     await message.reply(
+#         text, reply_markup=await paginated_musics_ikb(query, pagination, session)
+#     )
 
 
 @router.callback_query(
@@ -96,20 +144,32 @@ async def admin_callbacks_for_paginate(
 @router.callback_query(
     PaginatedMusicsCallbackFactory.filter(F.action == "paginate"), ~IsAdmin()
 )
-async def admin_callbacks_for_music(
+async def guest_callbacks_for_music(
         callback: types.CallbackQuery,
         callback_data: PaginatedMusicsCallbackFactory,
         session: AsyncSession,
         state: FSMContext,
 ):
-    # await callback.message.answer(
-    #     _("Qo'shiqni yuklab olish uchun avval to'lovni amalga oshiring!"),
-    # )
-
     music_id = callback_data.value
     query = select(Music).where(Music.id == music_id)
     response = await session.execute(query)
     db_music = response.scalar_one_or_none()
+
+    query = select(Purchase).where(
+        Purchase.user_id == callback.from_user.id, Purchase.music_id == music_id
+    )
+    response = await session.execute(query)
+    purchase = response.scalar_one_or_none()
+    if purchase:
+        audio_file_id = db_music.file_id
+        try:
+            return await callback.message.answer_audio(audio=audio_file_id)
+        except Exception as e:
+            return await handle_error(
+                f"Error sending audio in '{__file__}'\nLinenumer: {sys._getframe().f_lineno}\nException: {e}",
+                e,
+            )
+
     if not db_music:
         await callback.message.answer(_("Musiqa topilmadi!"))
         return

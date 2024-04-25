@@ -1,6 +1,7 @@
 import sys
 
 from aiogram import Router, types, F
+from aiogram.filters import Command, or_f
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.i18n import gettext as _
 from aiogram.utils.i18n import lazy_gettext as __
@@ -20,7 +21,7 @@ from bot.utils import get_file_path, handle_error, size_representation
 router = Router()
 
 
-@router.message(F.text == __("🎶 Qo'shiqlar ro'yhati"), IsAdmin())
+@router.message(or_f(F.text == __("🎶 Qo'shiqlar ro'yhati"), Command('musics')), IsAdmin())
 async def admin_musics_list(
         message: types.Message, session: AsyncSession, state: FSMContext
 ):

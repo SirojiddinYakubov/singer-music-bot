@@ -9,10 +9,13 @@ from bot.pagination import calculate_start
 def guest_menu_kb():
     kb = [
         [
-            types.KeyboardButton(text=_("🎶 Sotib olingan qo'shiqlar")),
+            types.KeyboardButton(text=_("🎶 Qo'shiqlar ro'yhati")),
         ],
         [
-            types.KeyboardButton(text=_("⚙️ Sozlamalar ")),
+            types.KeyboardButton(text=_("🎵 Sotib olingan qo'shiqlar")),
+        ],
+        [
+            types.KeyboardButton(text=_("🌐 Tilni sozlash")),
         ],
     ]
     return types.ReplyKeyboardMarkup(

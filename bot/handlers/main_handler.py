@@ -29,7 +29,7 @@ async def start_command(
         )
     else:
         text = _("""
-        Assalomu aleykum {full_name}!\n\nQidiruvni amalga oshirish uchun qo'shiq nomi yoki qo'shiqchi nomini kiriting
+        Assalomu aleykum {full_name}! Menu orqali kerakli tanlovni tanlang:
         """).format(
             full_name=message.from_user.full_name
         )
@@ -39,21 +39,25 @@ async def start_command(
         )
 
 
-@router.callback_query(or_f(F.text == __("🌐 Tilni sozlash"), LangCallbackFactory.filter()))
+@router.callback_query(LangCallbackFactory.filter())
 async def set_user_lang_callback(
         callback: types.CallbackQuery,
         callback_data: LangCallbackFactory,
         session: AsyncSession,
 ):
-    if callback_data.action == "set":
-        lang_code = callback_data.value
-        await set_user_language(callback.from_user, lang_code, session)
-        await callback.message.delete()
-        await callback.message.answer(
-            "Til muvaffaqiyatli sozlandi!/Язык успешно установлен!\n\nQidiruvni amalga oshirish uchun qo'shiq nomi yoki qo'shiqchi nomini kiriting/Введите название песни или имя исполнителя",
-        )
-    else:
-        await callback.message.answer(
-            "Tilni tanlang:\nВыберите язык:", reply_markup=ask_lang_code_kb()
-        )
+    lang_code = callback_data.value
+    await set_user_language(callback.from_user, lang_code, session)
+    await callback.message.delete()
+    await callback.message.answer(
+        "Til muvaffaqiyatli sozlandi!/Язык успешно установлен!",
+    )
     await callback.answer()
+
+
+@router.message(F.text == __("🌐 Tilni sozlash"))
+async def set_user_lang(
+        message: types.Message
+):
+    await message.answer(
+        "Tilni tanlang:\nВыберите язык:", reply_markup=ask_lang_code_kb()
+    )
