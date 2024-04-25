@@ -159,9 +159,10 @@ async def admin_add_music(message: types.Message, state: FSMContext):
 async def admin_upload_music(
         message: types.Message, session: AsyncSession, state: FSMContext
 ):
-    await state.set_state(AddMusicState.price)
-
-    path = await get_file_path(message.audio.file_id)
+    code, path = await get_file_path(message.audio.file_id)
+    if code != 200:
+        await message.reply(path)
+        return
     music = Music(
         created_by_id=message.from_user.id,
         duration=message.audio.duration,
@@ -175,7 +176,8 @@ async def admin_upload_music(
     await session.commit()
 
     await state.update_data(last_music_id=music.id)
-    await message.reply(_("Musiqa muvaffaqiyatli yuklandi! Endi musiqa narxini UZS'da kiriting: Masalan: 200000"))
+    await state.set_state(AddMusicState.price)
+    await message.reply(_("Endi musiqa narxini UZS'da kiriting: Masalan: 200000"))
 
 
 @router.message(AddMusicState.price, F.text.isdigit(), IsAdmin())
