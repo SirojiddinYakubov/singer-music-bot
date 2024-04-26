@@ -155,29 +155,36 @@ async def admin_add_music(message: types.Message, state: FSMContext):
     await message.answer(_("Audio faylni yuklang!"))
 
 
-@router.message(AddMusicState.audio, IsAdmin())
+@router.message(AddMusicState.audio, F.audio, IsAdmin())
 async def admin_upload_music(
-        message: types.Message, session: AsyncSession, state: FSMContext
+        message: types.Message, state: FSMContext
 ):
+    if not message.audio.mime_type.startswith('audio/mpeg'):
+        await message.reply("Kechirasiz, faqat MP3 formatidagi musiqa fayllariga ruxsat beriladi.")
+        return
+
     code, path = await get_file_path(message.audio.file_id)
     if code != 200:
         await message.reply(path)
         return
-    music = Music(
-        created_by_id=message.from_user.id,
-        duration=message.audio.duration,
+
+    await state.update_data(
         file_id=message.audio.file_id,
+        duration=message.audio.duration,
         size=message.audio.file_size,
         mime_type=message.audio.mime_type,
         title=message.audio.file_name,
-        path=path,
+        path=path
     )
-    session.add(music)
-    await session.commit()
-
-    await state.update_data(last_music_id=music.id)
     await state.set_state(AddMusicState.price)
     await message.reply(_("Endi musiqa narxini UZS'da kiriting: Masalan: 200000"))
+
+
+@router.message(AddMusicState.audio, ~F.audio, IsAdmin())
+async def admin_upload_music(
+        message: types.Message, state: FSMContext
+):
+    await message.reply(_("Iltimos, audio faylni yuklang!"))
 
 
 @router.message(AddMusicState.price, F.text.isdigit(), IsAdmin())
@@ -185,19 +192,20 @@ async def admin_set_music_price(
         message: types.Message, session: AsyncSession, state: FSMContext
 ):
     data = await state.get_data()
-    last_music_id = data.get("last_music_id", None)
-    await state.clear()
-
-    if not last_music_id:
+    if not data:
         return await message.reply(_("Oldin yuklangan musiqa topilmadi!"))
-
-    query = (
-        update(Music)
-        .where(Music.id == int(last_music_id))
-        .values(price=int(message.text))
-    )
-    await session.execute(query)
-    await session.commit()
+    try:
+        music = Music(
+            created_by_id=message.from_user.id,
+            price=int(message.text),
+            **data
+        )
+        session.add(music)
+        await session.commit()
+    except Exception as e:
+        print(e)
+        return await message.reply(str(e))
+    await state.clear()
     await message.reply(_("Musiqa muvaffaqiyatli yuklandi!"))
 
 

@@ -1,6 +1,7 @@
 from .base_model import BaseModel
 import sqlalchemy as db
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, validates
+from aiogram.utils.i18n import gettext as _
 
 
 class User(BaseModel):
@@ -21,12 +22,20 @@ class Music(BaseModel):
     size = db.Column(db.Integer, nullable=False)
     mime_type = db.Column(db.String(100), nullable=False)
     created_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    price = db.Column(db.Integer, nullable=True, default=0)
+    price = db.Column(db.Integer, nullable=False)
 
     created_by = relationship(User, foreign_keys=[created_by_id], backref="musics", lazy="selectin")
 
+    __table_args__ = (db.CheckConstraint(0 < price, name='check_price'), {})
+
     def __repr__(self):
         return self.title
+
+    @validates('price')
+    def validate_price(self, key, value):
+        if value <= 0:
+            raise Exception(_("Narx 0 dan katta bo'lishi kerak!"))
+        return value
 
 
 class Purchase(BaseModel):

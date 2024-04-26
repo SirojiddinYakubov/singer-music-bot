@@ -42,7 +42,7 @@ class Settings(BaseSettings):
             path=f"{values.data.get('DATABASE_NAME') or ''}?prepared_statement_cache_size=0",
         )
 
-    PAGE_SIZE: int = 3
+    PAGE_SIZE: int = 5
 
     WEB_SERVER_HOST: str = "0.0.0.0"
     WEB_SERVER_PORT: int = 8000
