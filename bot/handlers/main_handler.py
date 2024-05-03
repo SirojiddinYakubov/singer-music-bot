@@ -1,6 +1,7 @@
 from aiogram import Router, types, F
 from aiogram.filters import CommandStart, or_f
 from aiogram.fsm.context import FSMContext
+from aiogram.types import ReplyKeyboardRemove
 from aiogram.utils.i18n import gettext as _
 from aiogram.utils.i18n import lazy_gettext as __
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -47,13 +48,9 @@ async def set_user_lang_callback(
     lang_code = callback_data.value
     await set_user_language(callback.from_user, lang_code, session)
     await callback.message.delete()
-    if callback.from_user.id in settings.ADMIN_IDS:
-        kb = admin_menu_kb()
-    else:
-        kb = guest_menu_kb()
     await callback.message.answer(
-        _("Til muvaffaqiyatli sozlandi!/Язык успешно установлен!"),
-        reply_markup=kb,
+        _("Til muvaffaqiyatli sozlandi, Qayta /start tugmasini bosing!\nЯзык успешно установлен, Нажмите /start еще раз!"),
+        reply_markup=ReplyKeyboardRemove(),
     )
     await callback.answer()
 

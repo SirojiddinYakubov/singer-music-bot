@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-05-03 09:20+0500\n"
+"POT-Creation-Date: 2024-05-03 09:36+0500\n"
 "PO-Revision-Date: 2024-05-03 09:20+0500\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ru\n"
@@ -87,19 +87,21 @@ msgstr "Музыка {music_title} успешно удалена!"
 msgid "🎵 Sotib olingan qo'shiqlar"
 msgstr "🎵 Купленные песни"
 
-#: bot/handlers/main_handler.py:29
+#: bot/handlers/main_handler.py:30
 msgid "Assalomu aleykum ADMIN"
 msgstr "Привет, АДМИН"
 
-#: bot/handlers/main_handler.py:32
+#: bot/handlers/main_handler.py:33
 msgid "Assalomu aleykum {full_name}! Menu orqali kerakli tanlovni tanlang:"
 msgstr "Здравствуйте, {full_name}! Выберите нужную опцию через меню:"
 
-#: bot/handlers/main_handler.py:55
-msgid "Til muvaffaqiyatli sozlandi!/Язык успешно установлен!"
+#: bot/handlers/main_handler.py:52
+msgid ""
+"Til muvaffaqiyatli sozlandi, Qayta /start tugmasini bosing!\n"
+"Язык успешно установлен, Нажмите /start еще раз!"
 msgstr ""
 
-#: bot/handlers/main_handler.py:61 bot/keyboards/admin/main_keyboard.py:18
+#: bot/handlers/main_handler.py:58 bot/keyboards/admin/main_keyboard.py:18
 #: bot/keyboards/guest/main_keyboard.py:17
 msgid "🌐 Tilni sozlash"
 msgstr "🌐 Настройка языка"
@@ -128,4 +130,7 @@ msgstr "❌ Удалить"
 #: bot/models/common_model.py:37
 msgid "Narx 0 dan katta bo'lishi kerak!"
 msgstr "Значение должно быть больше 0!"
+
+#~ msgid "Til muvaffaqiyatli sozlandi!/Язык успешно установлен!"
+#~ msgstr ""
 
