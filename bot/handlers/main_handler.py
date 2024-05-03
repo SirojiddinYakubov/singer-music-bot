@@ -19,6 +19,7 @@ async def start_command(
         message: types.Message, session: AsyncSession, state: FSMContext
 ):
     lang_code = await detect_user_language(message.from_user, session)
+    # lang_code = None
     if not lang_code:
         return await message.answer(
             "Tilni tanlang:\nВыберите язык:", reply_markup=ask_lang_code_kb()
@@ -28,9 +29,7 @@ async def start_command(
             _("Assalomu aleykum ADMIN"), reply_markup=admin_menu_kb()
         )
     else:
-        text = _("""
-        Assalomu aleykum {full_name}! Menu orqali kerakli tanlovni tanlang:
-        """).format(
+        text = _("""Assalomu aleykum {full_name}! Menu orqali kerakli tanlovni tanlang:""").format(
             full_name=message.from_user.full_name
         )
         await message.answer(
@@ -48,8 +47,13 @@ async def set_user_lang_callback(
     lang_code = callback_data.value
     await set_user_language(callback.from_user, lang_code, session)
     await callback.message.delete()
+    if callback.from_user.id in settings.ADMIN_IDS:
+        kb = admin_menu_kb()
+    else:
+        kb = guest_menu_kb()
     await callback.message.answer(
-        "Til muvaffaqiyatli sozlandi!/Язык успешно установлен!",
+        _("Til muvaffaqiyatli sozlandi!/Язык успешно установлен!"),
+        reply_markup=kb,
     )
     await callback.answer()
 

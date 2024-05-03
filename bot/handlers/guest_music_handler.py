@@ -89,7 +89,7 @@ async def guest_purchase_list(
 #         for i, music in enumerate(musics, start=1):
 #             text += f"{i}. {music.title}\n"
 #     else:
-#         text = _("{searched_text} bo'yicha qidiruvda hech qanday musiqa topilmadi!").format(searched_text=message.text)
+#         text = _("{searched_text} bo'yicha qidiruvda hech qanday qo'shiq topilmadi!").format(searched_text=message.text)
 #     await message.reply(
 #         text, reply_markup=await paginated_musics_ikb(query, pagination, session)
 #     )
@@ -171,7 +171,7 @@ async def guest_callbacks_for_music(
             )
 
     if not db_music:
-        await callback.message.answer(_("Musiqa topilmadi!"))
+        await callback.message.answer(_("Qo'shiq topilmadi!"))
         return
     music_price = db_music.price * 100
     await callback.message.bot.send_invoice(
@@ -224,4 +224,4 @@ async def process_successful_payment(message: types.Message, session: AsyncSessi
         await handle_error(
             f"Music with id {payload.music_id} not found in '{__file__}'\nLinenumer: {sys._getframe().f_lineno}"
         )
-        await message.answer(_("Musiqa topilmadi!"))
+        await message.answer(_("Qo'shiq topilmadi!"))

@@ -2,8 +2,7 @@ from aiogram import types
 from aiogram.utils.i18n import gettext as _
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from bot.callbacks import LangCallbackFactory, PaginatedMusicsCallbackFactory
-from bot.pagination import calculate_start
+from bot.callbacks import LangCallbackFactory
 
 
 def guest_menu_kb():

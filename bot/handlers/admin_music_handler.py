@@ -111,7 +111,7 @@ async def admin_callbacks_for_music(
             text += f"{col}: {getattr(db_music, col)}\n"
         await callback.message.edit_text(text, reply_markup=await admin_action_music_ikb(db_music.id))
     else:
-        await callback.message.answer(_("Musiqa topilmadi!"))
+        await callback.message.answer(_("Qo'shiq topilmadi!"))
     await callback.answer()
 
 
@@ -143,7 +143,7 @@ async def admin_search_music_result(
         for i, music in enumerate(musics, start=1):
             text += f"{i}. {music.title}\n"
     else:
-        text = _("{searched_text} bo'yicha qidiruvda hech qanday musiqa topilmadi!").format(searched_text=message.text)
+        text = _("{searched_text} bo'yicha qidiruvda hech qanday qo'shiq topilmadi!").format(searched_text=message.text)
     await message.reply(
         text, reply_markup=await paginated_musics_ikb(query, pagination, session)
     )
@@ -160,7 +160,7 @@ async def admin_upload_music(
         message: types.Message, state: FSMContext
 ):
     if not message.audio.mime_type.startswith('audio/mpeg'):
-        await message.reply("Kechirasiz, faqat MP3 formatidagi musiqa fayllariga ruxsat beriladi.")
+        await message.reply("Kechirasiz, faqat MP3 formatidagi qo'shiq fayllariga ruxsat beriladi.")
         return
 
     code, path = await get_file_path(message.audio.file_id)
@@ -177,7 +177,7 @@ async def admin_upload_music(
         path=path
     )
     await state.set_state(AddMusicState.price)
-    await message.reply(_("Endi musiqa narxini UZS'da kiriting: Masalan: 200000"))
+    await message.reply(_("Endi qo'shiq narxini UZS'da kiriting: Masalan: 200000"))
 
 
 @router.message(AddMusicState.audio, ~F.audio, IsAdmin())
@@ -193,7 +193,7 @@ async def admin_set_music_price(
 ):
     data = await state.get_data()
     if not data:
-        return await message.reply(_("Oldin yuklangan musiqa topilmadi!"))
+        return await message.reply(_("Oldin yuklangan qo'shiq topilmadi!"))
     try:
         music = Music(
             created_by_id=message.from_user.id,
@@ -206,7 +206,7 @@ async def admin_set_music_price(
         print(e)
         return await message.reply(str(e))
     await state.clear()
-    await message.reply(_("Musiqa muvaffaqiyatli yuklandi!"))
+    await message.reply(_("Qo'shiq muvaffaqiyatli yuklandi!"))
 
 
 @router.message(AddMusicState.price, ~F.text.isdigit(), IsAdmin())
@@ -239,7 +239,7 @@ async def admin_download_music(
                 e,
             )
     else:
-        await callback.message.answer(_("Musiqa topilmadi!"))
+        await callback.message.answer(_("Qo'shiq topilmadi!"))
     await callback.answer()
 
 
