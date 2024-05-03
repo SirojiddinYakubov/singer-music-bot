@@ -118,7 +118,7 @@ async def admin_callbacks_for_music(
 @router.message(F.text == __("🔎 Qo'shiq izlash"), IsAdmin())
 async def admin_search_musics(message: types.Message, state: FSMContext):
     await state.set_state(SearchMusicState.title)
-    await message.answer(_("Qo'shiq yoki qo'shiqchi nomini kiriting!"))
+    await message.answer(_("Qo'shiq nomini kiriting!"))
 
 
 @router.message(SearchMusicState.title, IsAdmin())

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-05-03 09:36+0500\n"
+"POT-Creation-Date: 2024-05-03 10:15+0500\n"
 "PO-Revision-Date: 2024-05-03 09:20+0500\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ru\n"
@@ -42,8 +42,8 @@ msgid "🔎 Qo'shiq izlash"
 msgstr "🔎 Поиск песни"
 
 #: bot/handlers/admin_music_handler.py:121
-msgid "Qo'shiq yoki qo'shiqchi nomini kiriting!"
-msgstr "Введите название песни или исполнителя!"
+msgid "Qo'shiq nomini kiriting!"
+msgstr "Введите название песни!"
 
 #: bot/handlers/admin_music_handler.py:146
 msgid "{searched_text} bo'yicha qidiruvda hech qanday qo'shiq topilmadi!"
