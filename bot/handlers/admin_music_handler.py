@@ -8,12 +8,12 @@ from aiogram.utils.i18n import lazy_gettext as __
 from sqlalchemy import desc, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.callbacks import MusicActionCallbackFactory, PaginatedMusicsCallbackFactory
+from bot.callbacks import MusicActionCallbackFactory, PaginatedMusicsCallbackFactory, PaginatedPurchasesCallbackFactory
 from bot.core.config import settings
 from bot.filters import IsAdmin
 from bot.keyboards.admin.main_keyboard import admin_action_music_ikb
-from bot.keyboards.base_keyboard import paginated_musics_ikb
-from bot.models import Music
+from bot.keyboards.base_keyboard import paginated_musics_ikb, paginated_purchases_ikb
+from bot.models import Music, Purchase
 from bot.pagination import apply_pagination, calculate_start
 from bot.states.admin_states import AddMusicState, SearchMusicState
 from bot.utils import get_file_path, handle_error, size_representation
@@ -265,4 +265,73 @@ async def admin_delete_music(
         await callback.message.answer(_("{music_title} muvaffaqiyatli o'chirildi!").format(music_title=music_title))
     else:
         print(f"Music file with id {music_id} not found.")
+    await callback.answer()
+
+
+@router.message(F.text == __("🎵 Sotib olingan qo'shiqlar"), IsAdmin())
+async def admin_purchase_list(
+        message: types.Message, session: AsyncSession, state: FSMContext
+):
+    await state.clear()
+    query = (
+        select(Purchase)
+        .order_by(desc(Purchase.created_at))
+    )
+    query, pagination = await apply_pagination(
+        query, session, page_size=settings.PAGE_SIZE, page_number=1
+    )
+    response = await session.execute(query)
+    purchases = response.scalars().all()
+    if len(purchases):
+        text = ""
+        for i, purchase in enumerate(purchases, start=1):
+            text += f"{i}. {purchase.user} | {purchase.amount} so'm | {purchase.music.title} | {purchase.created_at}\n"
+    else:
+        text = _("Sotib olingan qo'shiqlar mavjud emas!")
+    await message.reply(
+        text, reply_markup=await paginated_purchases_ikb(query, pagination, session)
+    )
+
+
+@router.callback_query(
+    PaginatedPurchasesCallbackFactory.filter(F.action.in_(["purchase_next", "purchase_prev"])), IsAdmin()
+)
+async def admin_purchase_callbacks_for_paginate(
+        callback: types.CallbackQuery,
+        callback_data: PaginatedPurchasesCallbackFactory,
+        session: AsyncSession,
+        state: FSMContext,
+):
+    query = select(Purchase).order_by(desc(Purchase.created_at))
+
+    if callback_data.action == "purchase_next":
+        if callback_data.page_number < callback_data.num_pages:
+            page_number = callback_data.page_number + 1
+        else:
+            page_number = callback_data.page_number
+            await callback.answer("This is the last page")
+    elif callback_data.action == "purchase_prev":
+        if callback_data.page_number > 1:
+            page_number = callback_data.page_number - 1
+        else:
+            page_number = 1
+            await callback.answer("This is the first page")
+    query, pagination = await apply_pagination(
+        query, session, page_size=callback_data.page_size, page_number=page_number
+    )
+    response = await session.execute(query)
+    purchases = response.scalars().all()
+    if len(purchases):
+        text = ""
+        for i, purchase in enumerate(
+                purchases,
+                start=calculate_start(pagination["page_number"], pagination["page_size"]),
+        ):
+            text += f"{i}. {purchase.user} | {purchase.amount} so'm | {purchase.music.title} | {purchase.created_at}\n"
+    else:
+        text = _("Sotib olingan qo'shiqlar mavjud emas!")
+    await callback.message.edit_text(text)
+    await callback.message.edit_reply_markup(
+        reply_markup=await paginated_purchases_ikb(query, pagination, session)
+    )
     await callback.answer()

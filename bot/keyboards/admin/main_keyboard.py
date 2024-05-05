@@ -11,9 +11,9 @@ def admin_menu_kb():
         [
             types.KeyboardButton(text=_("➕ Qo'shiq qo'shish")),
         ],
-        # [
-        #     types.KeyboardButton(text=_("Sotib olingan qo'shiqlar ro'yhati 🎵")),
-        # ]
+        [
+            types.KeyboardButton(text=_("🎵 Sotib olingan qo'shiqlar")),
+        ],
         [
             types.KeyboardButton(text=_("🌐 Tilni sozlash")),
         ],
