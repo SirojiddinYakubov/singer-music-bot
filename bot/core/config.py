@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     REDIS_HOST: str
     REDIS_PORT: str | int
 
-    ADMIN_IDS: list[int] = [1470735667, 360176754, 183551052]
+    ADMIN_IDS: list[int] = [1470735667, 360176754, 183551051]
 
     DATABASE_PORT: int
     DATABASE_PASSWORD: str
@@ -42,7 +42,7 @@ class Settings(BaseSettings):
             path=f"{values.data.get('DATABASE_NAME') or ''}?prepared_statement_cache_size=0",
         )
 
-    PAGE_SIZE: int = 3
+    PAGE_SIZE: int = 5
 
     WEB_SERVER_HOST: str = "0.0.0.0"
     WEB_SERVER_PORT: int = 8000
