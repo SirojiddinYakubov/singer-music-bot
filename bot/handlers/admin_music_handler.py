@@ -232,7 +232,7 @@ async def admin_download_music(
     if db_music:
         audio_file_id = db_music.file_id
         try:
-            await callback.message.answer_audio(audio=audio_file_id)
+            await callback.message.answer_audio(audio=audio_file_id, protect_content=True)
         except Exception as e:
             await handle_error(
                 f"Error sending audio in '{__file__}'\nLinenumer: {sys._getframe().f_lineno}\nException: {e}",

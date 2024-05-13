@@ -163,7 +163,7 @@ async def guest_callbacks_for_music(
     if purchase:
         audio_file_id = db_music.file_id
         try:
-            return await callback.message.answer_audio(audio=audio_file_id)
+            return await callback.message.answer_audio(audio=audio_file_id, protect_content=True)
         except Exception as e:
             return await handle_error(
                 f"Error sending audio in '{__file__}'\nLinenumer: {sys._getframe().f_lineno}\nException: {e}",
@@ -214,7 +214,7 @@ async def process_successful_payment(message: types.Message, session: AsyncSessi
     if db_music:
         audio_file_id = db_music.file_id
         try:
-            await message.answer_audio(audio=audio_file_id)
+            await message.answer_audio(audio=audio_file_id, protect_content=True)
         except Exception as e:
             await handle_error(
                 f"Error sending audio in '{__file__}'\nLinenumer: {sys._getframe().f_lineno}\nException: {e}",
