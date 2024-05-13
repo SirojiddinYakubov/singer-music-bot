@@ -21,7 +21,7 @@ class Music(BaseModel):
     path = db.Column(db.String(100), nullable=False)
     size = db.Column(db.Integer, nullable=False)
     mime_type = db.Column(db.String(100), nullable=False)
-    created_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    created_by_id = db.Column(db.BigInteger, db.ForeignKey('user.id'), nullable=False)
     price = db.Column(db.Integer, nullable=False)
 
     created_by = relationship(User, foreign_keys=[created_by_id], backref="musics", lazy="selectin")
@@ -39,7 +39,7 @@ class Music(BaseModel):
 
 
 class Purchase(BaseModel):
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.BigInteger, db.ForeignKey('user.id'), nullable=False)
     music_id = db.Column(db.Integer, db.ForeignKey('music.id'), nullable=False)
     amount = db.Column(db.Integer, nullable=False)
 

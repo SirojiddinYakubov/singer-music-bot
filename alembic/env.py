@@ -8,7 +8,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[1]))
-print(12, str(pathlib.Path(__file__).resolve().parents[1]))
 
 from bot.models.base_model import BaseModel
 
