@@ -4,7 +4,7 @@ from aiogram.enums import ContentType
 from aiogram.filters import Command, or_f
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.i18n import gettext as _
-from sqlalchemy import desc, select
+from sqlalchemy import desc, select, asc
 from sqlalchemy.ext.asyncio import AsyncSession
 from aiogram.utils.i18n import lazy_gettext as __
 from bot.callbacks import PaginatedMusicsCallbackFactory, PaymentInfoFactory
@@ -23,7 +23,7 @@ async def admin_musics_list(
         message: types.Message, session: AsyncSession, state: FSMContext
 ):
     await state.clear()
-    query = select(Music).order_by(desc(Music.created_at))
+    query = select(Music).filter(Music.is_active.is_(True)).order_by(asc(Music.sort), desc(Music.created_at))
     query, pagination = await apply_pagination(
         query, session, page_size=settings.PAGE_SIZE, page_number=1
     )
@@ -48,7 +48,7 @@ async def guest_purchase_list(
     query = (
         select(Music)
         .join(Purchase, Purchase.music_id == Music.id)
-        .filter(Purchase.user_id == message.from_user.id, Purchase.music_id == Music.id)
+        .filter(Purchase.user_id == message.from_user.id, Purchase.music_id == Music.id, Music.is_active.is_(True))
         .order_by(desc(Music.created_at))
     )
     query, pagination = await apply_pagination(
@@ -106,7 +106,7 @@ async def admin_callbacks_for_paginate(
 ):
     data = await state.get_data()
     searched_text = data.get("searched_text", None)
-    query = select(Music).order_by(desc(Music.created_at))
+    query = select(Music).filter(Music.is_active.is_(True)).order_by(asc(Music.sort), desc(Music.created_at))
 
     if searched_text:
         query = query.filter(Music.title.ilike(f"%{searched_text}%"))
@@ -151,7 +151,7 @@ async def guest_callbacks_for_music(
         state: FSMContext,
 ):
     music_id = callback_data.value
-    query = select(Music).where(Music.id == music_id)
+    query = select(Music).where(Music.id == music_id, Music.is_active.is_(True))
     response = await session.execute(query)
     db_music = response.scalar_one_or_none()
 
@@ -208,7 +208,7 @@ async def process_successful_payment(message: types.Message, session: AsyncSessi
     session.add(purchase)
     await session.commit()
 
-    query = select(Music).where(Music.id == payload.music_id)
+    query = select(Music).where(Music.id == payload.music_id, Music.is_active.is_(True))
     response = await session.execute(query)
     db_music = response.scalar_one_or_none()
     if db_music:

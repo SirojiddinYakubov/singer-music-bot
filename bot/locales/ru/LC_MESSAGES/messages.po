@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-05-03 10:15+0500\n"
+"POT-Creation-Date: 2024-05-20 10:58+0500\n"
 "PO-Revision-Date: 2024-05-03 09:20+0500\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ru\n"
@@ -19,16 +19,29 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.13.1\n"
 
-#: bot/handlers/admin_music_handler.py:24
+#: bot/utils.py:32 bot/utils.py:52
+msgid ""
+"Fayl yuklashda xatolik yuz berdi! {url} bo'yicha 200 status qabul "
+"qilinmadi!"
+msgstr "При загрузке файла произошла ошибка! Статус 200 не получен на {url}!"
+
+#: bot/utils.py:39
+msgid ""
+"Fayl yuklashda xatolik yuz berdi! {url} bo'yicha 'result' 'file_path' "
+"topilmadi!"
+msgstr "При загрузке файла произошла ошибка! «file_path» «result» на "
+"{url} не найден!"
+
+#: bot/handlers/admin_music_handler.py:27
 #: bot/handlers/guest_music_handler.py:21
 #: bot/keyboards/admin/main_keyboard.py:9
 #: bot/keyboards/guest/main_keyboard.py:11
 msgid "🎶 Qo'shiqlar ro'yhati"
 msgstr "🎶 Список песен"
 
-#: bot/handlers/admin_music_handler.py:40
-#: bot/handlers/admin_music_handler.py:114
-#: bot/handlers/admin_music_handler.py:242
+#: bot/handlers/admin_music_handler.py:43
+#: bot/handlers/admin_music_handler.py:118
+#: bot/handlers/admin_music_handler.py:302
 #: bot/handlers/guest_music_handler.py:37
 #: bot/handlers/guest_music_handler.py:64
 #: bot/handlers/guest_music_handler.py:174
@@ -36,56 +49,82 @@ msgstr "🎶 Список песен"
 msgid "Qo'shiq topilmadi!"
 msgstr "Песня не найдена!"
 
-#: bot/handlers/admin_music_handler.py:118
+#: bot/handlers/admin_music_handler.py:122
 #: bot/keyboards/admin/main_keyboard.py:10
 msgid "🔎 Qo'shiq izlash"
 msgstr "🔎 Поиск песни"
 
-#: bot/handlers/admin_music_handler.py:121
+#: bot/handlers/admin_music_handler.py:125
 msgid "Qo'shiq nomini kiriting!"
 msgstr "Введите название песни!"
 
-#: bot/handlers/admin_music_handler.py:146
+#: bot/handlers/admin_music_handler.py:151
 msgid "{searched_text} bo'yicha qidiruvda hech qanday qo'shiq topilmadi!"
 msgstr "Песни по запросу '{searched_text}' не найдены!"
 
-#: bot/handlers/admin_music_handler.py:152
+#: bot/handlers/admin_music_handler.py:157
 #: bot/keyboards/admin/main_keyboard.py:12
 msgid "➕ Qo'shiq qo'shish"
 msgstr "➕ Добавить песню"
 
-#: bot/handlers/admin_music_handler.py:155
+#: bot/handlers/admin_music_handler.py:160
 msgid "Audio faylni yuklang!"
 msgstr "Загрузите аудиофайл!"
 
-#: bot/handlers/admin_music_handler.py:180
+#: bot/handlers/admin_music_handler.py:169
+msgid "Kechirasiz, faqat MP3 formatidagi qo'shiq fayllariga ruxsat beriladi."
+msgstr "К сожалению, разрешены только файлы песен в формате MP3."
+
+#: bot/handlers/admin_music_handler.py:196
+#: bot/handlers/admin_music_handler.py:446
 msgid "Endi qo'shiq narxini UZS'da kiriting: Masalan: 200000"
 msgstr "Теперь введите цену песни в сумах: Пример: 200000."
 
-#: bot/handlers/admin_music_handler.py:187
+#: bot/handlers/admin_music_handler.py:204
 msgid "Iltimos, audio faylni yuklang!"
 msgstr "Пожалуйста, загрузите аудиофайл!"
 
-#: bot/handlers/admin_music_handler.py:196
+#: bot/handlers/admin_music_handler.py:214
+#: bot/handlers/admin_music_handler.py:220
+#: bot/handlers/admin_music_handler.py:244
+#: bot/handlers/admin_music_handler.py:250
 msgid "Oldin yuklangan qo'shiq topilmadi!"
 msgstr "Пре загруженная песня не найдена!"
 
-#: bot/handlers/admin_music_handler.py:209
-msgid "Qo'shiq muvaffaqiyatli yuklandi!"
-msgstr "Песня успешно загружена!"
+#: bot/handlers/admin_music_handler.py:226
+msgid "Endi qo'shiq tartibini kiriting: Masalan: 1"
+msgstr "Теперь введите порядок песен: Например: 1"
 
-#: bot/handlers/admin_music_handler.py:216
+#: bot/handlers/admin_music_handler.py:234
 msgid "Narx kiritishda xatolik! Quyidagi formatda kiriting: Masalan: 200000"
 msgstr "Ошибка при вводе цены! Введите в следующем формате: Например: 200000."
 
-#: bot/handlers/admin_music_handler.py:265
+#: bot/handlers/admin_music_handler.py:275
+msgid "Jarayon muvaffaqiyatli amalga oshirildi!"
+msgstr "Процесс прошел успешно!"
+
+#: bot/handlers/admin_music_handler.py:284
+msgid ""
+"Qo'shiq tartibini kiritishda xatolik! Quyidagi formatda kiriting: "
+"Masalan: 1"
+msgstr "Ошибка при вводе порядка песен! Введите в следующем формате: "
+"Например: 200000."
+
+#: bot/handlers/admin_music_handler.py:359
 msgid "{music_title} muvaffaqiyatli o'chirildi!"
 msgstr "Музыка {music_title} успешно удалена!"
 
+#: bot/handlers/admin_music_handler.py:365
 #: bot/handlers/guest_music_handler.py:43
+#: bot/keyboards/admin/main_keyboard.py:15
 #: bot/keyboards/guest/main_keyboard.py:14
 msgid "🎵 Sotib olingan qo'shiqlar"
 msgstr "🎵 Купленные песни"
+
+#: bot/handlers/admin_music_handler.py:384
+#: bot/handlers/admin_music_handler.py:426
+msgid "Sotib olingan qo'shiqlar mavjud emas!"
+msgstr "Купленные песни не найдены!"
 
 #: bot/handlers/main_handler.py:30
 msgid "Assalomu aleykum ADMIN"
@@ -106,11 +145,11 @@ msgstr ""
 msgid "🌐 Tilni sozlash"
 msgstr "🌐 Настройка языка"
 
-#: bot/keyboards/base_keyboard.py:21
+#: bot/keyboards/base_keyboard.py:21 bot/keyboards/base_keyboard.py:36
 msgid "◀️ oldingi"
 msgstr "◀️ предыдущий"
 
-#: bot/keyboards/base_keyboard.py:25
+#: bot/keyboards/base_keyboard.py:25 bot/keyboards/base_keyboard.py:40
 msgid "▶️ keyingi"
 msgstr "▶️ следующий"
 
@@ -124,13 +163,24 @@ msgid "🎧 Yuklab olish"
 msgstr "🎧 Скачать"
 
 #: bot/keyboards/admin/main_keyboard.py:38
+msgid "✏️ Tahrirlash"
+msgstr "✏️ Изменение"
+
+#: bot/keyboards/admin/main_keyboard.py:44
 msgid "❌ O'chirish"
 msgstr "❌ Удалить"
 
-#: bot/models/common_model.py:37
+#: bot/models/common_model.py:43
 msgid "Narx 0 dan katta bo'lishi kerak!"
-msgstr "Значение должно быть больше 0!"
+msgstr "Цена должна быть больше 0!"
+
+#: bot/models/common_model.py:49
+msgid "Tartib 0 dan katta bo'lishi kerak!"
+msgstr "Порядок должен быть больше 0!"
 
 #~ msgid "Til muvaffaqiyatli sozlandi!/Язык успешно установлен!"
 #~ msgstr ""
+
+#~ msgid "Qo'shiq muvaffaqiyatli yuklandi!"
+#~ msgstr "Песня успешно загружена!"
 

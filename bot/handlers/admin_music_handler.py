@@ -8,7 +8,7 @@ from aiogram.filters import Command, or_f
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.i18n import gettext as _
 from aiogram.utils.i18n import lazy_gettext as __
-from sqlalchemy import desc, select, update
+from sqlalchemy import desc, select, asc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot.callbacks import MusicActionCallbackFactory, PaginatedMusicsCallbackFactory, PaginatedPurchasesCallbackFactory
@@ -19,7 +19,7 @@ from bot.keyboards.base_keyboard import paginated_musics_ikb, paginated_purchase
 from bot.models import Music, Purchase
 from bot.pagination import apply_pagination, calculate_start
 from bot.states.admin_states import AddMusicState, SearchMusicState
-from bot.utils import get_file_path, handle_error, size_representation, download_audio
+from bot.utils import size_representation, download_audio
 
 router = Router()
 
@@ -29,7 +29,7 @@ async def admin_musics_list(
         message: types.Message, session: AsyncSession, state: FSMContext
 ):
     await state.clear()
-    query = select(Music).order_by(desc(Music.created_at))
+    query = select(Music).filter(Music.is_active.is_(True)).order_by(asc(Music.sort), desc(Music.created_at))
     query, pagination = await apply_pagination(
         query, session, page_size=settings.PAGE_SIZE, page_number=1
     )
@@ -57,7 +57,7 @@ async def admin_callbacks_for_paginate(
 ):
     data = await state.get_data()
     searched_text = data.get("searched_text", None)
-    query = select(Music).order_by(desc(Music.created_at))
+    query = select(Music).filter(Music.is_active.is_(True)).order_by(asc(Music.sort), desc(Music.created_at))
 
     if searched_text:
         query = query.filter(Music.title.ilike(f"%{searched_text}%"))
@@ -102,12 +102,13 @@ async def admin_callbacks_for_music(
         state: FSMContext,
 ):
     music_id = callback_data.value
-    query = select(Music).where(Music.id == music_id)
+    query = select(Music).where(Music.id == music_id, Music.is_active.is_(True))
     response = await session.execute(query)
     db_music = response.scalar_one_or_none()
     if db_music:
         text = ""
-        for col in ["title", "id", "duration", "price", "size", "mime_type", "created_at", "created_by"]:
+        for col in ["title", "id", "duration", "price", "size", "mime_type", "is_active", "sort", "created_at",
+                    "created_by"]:
             if col == "size":
                 text += f"{col}: {size_representation(db_music.size)}\n"
                 continue
@@ -131,6 +132,7 @@ async def admin_search_music_result(
     await state.clear()
     query = (
         select(Music)
+        .filter(Music.is_active.is_(True))
         .filter(Music.title.ilike(f"%{message.text.lower()}%"))
         .order_by(desc(Music.created_at))
     )
@@ -160,47 +162,45 @@ async def admin_add_music(message: types.Message, state: FSMContext):
 
 @router.message(AddMusicState.audio, F.audio, IsAdmin())
 async def admin_upload_music(
-        message: types.Message, state: FSMContext
+        message: types.Message, state: FSMContext, session: AsyncSession
 ):
-    if not message.audio.mime_type.startswith('audio/mpeg'):
-        await message.reply("Kechirasiz, faqat MP3 formatidagi qo'shiq fayllariga ruxsat beriladi.")
-        return
-
-    # Download the audio file to the local media folder
-    file_id = message.audio.file_id
-    file_name = f"{uuid.uuid4()}.mp3"
-    local_path = os.path.join(settings.MEDIA_ROOT, file_name)
-
-    await message.bot.send_chat_action(
-        chat_id=message.chat.id, action=ChatAction.TYPING
-    )
-
     try:
-        await download_audio(file_id, local_path)
+        if not message.audio.mime_type.startswith('audio/mpeg'):
+            raise Exception(_("Kechirasiz, faqat MP3 formatidagi qo'shiq fayllariga ruxsat beriladi."))
+
+        # Download the audio file to the local media folder
+        file_id = message.audio.file_id
+        file_path = f"musics/{uuid.uuid4()}.mp3"
+        full_path = os.path.join(settings.MEDIA_ROOT, file_path)
+
+        await message.bot.send_chat_action(
+            chat_id=message.chat.id, action=ChatAction.TYPING
+        )
+
+        await download_audio(file_id, full_path)
+
+        music = Music(
+            created_by_id=message.from_user.id,
+            duration=message.audio.duration,
+            size=message.audio.file_size,
+            mime_type=message.audio.mime_type,
+            title=message.audio.file_name,
+            path=file_path,
+            is_active=False
+        )
+        session.add(music)
+        await session.commit()
+
+        await state.set_state(AddMusicState.price)
+        await state.update_data(music_id=music.id)
+        await message.reply(_("Endi qo'shiq narxini UZS'da kiriting: Masalan: 200000"))
     except Exception as e:
-        await message.reply(str(e))
-
-    code, path = await get_file_path(message.audio.file_id)
-    if code != 200:
-        await message.reply(path)
-        return
-
-    await state.update_data(
-        file_id=message.audio.file_id,
-        duration=message.audio.duration,
-        size=message.audio.file_size,
-        mime_type=message.audio.mime_type,
-        title=message.audio.file_name,
-        path=path
-    )
-    await state.set_state(AddMusicState.price)
-    await message.reply(_("Endi qo'shiq narxini UZS'da kiriting: Masalan: 200000"))
+        print(e)
+        return await message.reply(str(e))
 
 
 @router.message(AddMusicState.audio, ~F.audio, IsAdmin())
-async def admin_upload_music(
-        message: types.Message, state: FSMContext
-):
+async def admin_upload_music(message: types.Message):
     await message.reply(_("Iltimos, audio faylni yuklang!"))
 
 
@@ -208,29 +208,80 @@ async def admin_upload_music(
 async def admin_set_music_price(
         message: types.Message, session: AsyncSession, state: FSMContext
 ):
-    data = await state.get_data()
-    if not data:
-        return await message.reply(_("Oldin yuklangan qo'shiq topilmadi!"))
     try:
-        music = Music(
-            created_by_id=message.from_user.id,
-            price=int(message.text),
-            **data
-        )
-        session.add(music)
+        data = await state.get_data()
+        if data and "music_id" not in data:
+            raise Exception(_("Oldin yuklangan qo'shiq topilmadi!"))
+
+        query = select(Music).where(Music.id == int(data["music_id"]))
+        response = await session.execute(query)
+        db_music = response.scalar_one_or_none()
+        if not db_music:
+            raise Exception(_("Oldin yuklangan qo'shiq topilmadi!"))
+        db_music.price = int(message.text)
+        session.add(db_music)
         await session.commit()
+
+        await state.set_state(AddMusicState.sort)
+        await message.reply(_("Endi qo'shiq tartibini kiriting: Masalan: 1"))
     except Exception as e:
         print(e)
         return await message.reply(str(e))
-    await state.clear()
-    await message.reply(_("Qo'shiq muvaffaqiyatli yuklandi!"))
 
 
 @router.message(AddMusicState.price, ~F.text.isdigit(), IsAdmin())
-async def admin_set_music_price(
+async def admin_set_music_price(message: types.Message):
+    await message.reply(_("Narx kiritishda xatolik! Quyidagi formatda kiriting: Masalan: 200000"))
+
+
+@router.message(AddMusicState.sort, F.text.isdigit(), IsAdmin())
+async def admin_set_music_sort(
         message: types.Message, session: AsyncSession, state: FSMContext
 ):
-    await message.reply(_("Narx kiritishda xatolik! Quyidagi formatda kiriting: Masalan: 200000"))
+    try:
+        data = await state.get_data()
+        if data and "music_id" not in data:
+            raise Exception(_("Oldin yuklangan qo'shiq topilmadi!"))
+
+        query = select(Music).where(Music.id == int(data["music_id"]))
+        response = await session.execute(query)
+        db_music = response.scalar_one_or_none()
+        if not db_music:
+            raise Exception(_("Oldin yuklangan qo'shiq topilmadi!"))
+        db_music.sort = int(message.text)
+        db_music.is_active = True
+        session.add(db_music)
+        await session.commit()
+
+        query = (
+            select(Music)
+            .filter(
+                Music.is_active.is_(True),
+                Music.id != int(db_music.id)
+            ).order_by(
+                asc(Music.sort),
+                desc(Music.created_at)
+            )
+        )
+        response = await session.execute(query)
+        musics = response.scalars().all()
+        if len(musics):
+            for i, music in enumerate(musics, start=db_music.sort + 1):
+                music.sort = i
+                session.add(music)
+            await session.commit()
+
+        await state.clear()
+        await message.reply(_("Jarayon muvaffaqiyatli amalga oshirildi!"))
+
+    except Exception as e:
+        print(e)
+        return await message.reply(str(e))
+
+
+@router.message(AddMusicState.sort, ~F.text.isdigit(), IsAdmin())
+async def admin_set_music_sort(message: types.Message):
+    await message.reply(_("Qo'shiq tartibini kiritishda xatolik! Quyidagi formatda kiriting: Masalan: 1"))
 
 
 @router.callback_query(
@@ -242,22 +293,48 @@ async def admin_download_music(
         session: AsyncSession,
         state: FSMContext,
 ):
-    music_id = callback_data.value
-    query = select(Music).where(Music.id == music_id)
-    response = await session.execute(query)
-    db_music = response.scalar_one_or_none()
-    if db_music:
-        audio_file_id = db_music.file_id
-        try:
-            await callback.message.answer_audio(audio=audio_file_id, protect_content=True)
-        except Exception as e:
-            await handle_error(
-                f"Error sending audio in '{__file__}'\nLinenumer: {sys._getframe().f_lineno}\nException: {e}",
-                e,
+    try:
+        music_id = callback_data.value
+        query = select(Music).where(Music.id == music_id, Music.is_active.is_(True))
+        response = await session.execute(query)
+        db_music = response.scalar_one_or_none()
+        if not db_music:
+            raise Exception(_("Qo'shiq topilmadi!"))
+
+        file_path = os.path.join(settings.MEDIA_ROOT, db_music.path)
+
+        if not os.path.exists(file_path):
+            raise Exception(
+                f"Audio file not found in '{__file__}'\nLinenumer: {sys._getframe().f_lineno}"
             )
-    else:
-        await callback.message.answer(_("Qo'shiq topilmadi!"))
-    await callback.answer()
+
+        await callback.message.bot.send_chat_action(
+            chat_id=callback.message.chat.id, action=ChatAction.UPLOAD_DOCUMENT
+        )
+
+        await callback.message.reply_audio(
+            audio=types.FSInputFile(
+                path=file_path,
+                filename=db_music.title
+            ),
+            protect_content=True
+        )
+        await callback.answer()
+    except Exception as e:
+        await callback.message.answer(str(e))
+
+    # if db_music:
+    #     audio_file_id = db_music.file_id
+    #     try:
+    #         await callback.message.answer_audio(audio=audio_file_id, protect_content=True)
+    #     except Exception as e:
+    #         await handle_error(
+    #             f"Error sending audio in '{__file__}'\nLinenumer: {sys._getframe().f_lineno}\nException: {e}",
+    #             e,
+    #         )
+    # else:
+    #     await callback.message.answer(_("Qo'shiq topilmadi!"))
+    # await callback.answer()
 
 
 @router.callback_query(
@@ -270,7 +347,7 @@ async def admin_delete_music(
         state: FSMContext,
 ):
     music_id = callback_data.value
-    query = select(Music).filter(Music.id == music_id)
+    query = select(Music).filter(Music.id == music_id, Music.is_active.is_(True))
     result = await session.execute(query)
     music_obj = result.scalar_one_or_none()
     music_title = music_obj.title
@@ -352,3 +429,21 @@ async def admin_purchase_callbacks_for_paginate(
         reply_markup=await paginated_purchases_ikb(query, pagination, session)
     )
     await callback.answer()
+
+
+@router.callback_query(
+    MusicActionCallbackFactory.filter(F.action == "edit"), IsAdmin()
+)
+async def admin_edit_music(
+        callback: types.CallbackQuery,
+        callback_data: MusicActionCallbackFactory,
+        state: FSMContext,
+):
+    try:
+        music_id = callback_data.value
+        await state.set_state(AddMusicState.price)
+        await state.update_data(music_id=music_id)
+        await callback.message.answer(_("Endi qo'shiq narxini UZS'da kiriting: Masalan: 200000"))
+    except Exception as e:
+        print(e)
+        return await callback.message.answer(str(e))

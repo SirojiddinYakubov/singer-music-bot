@@ -35,6 +35,12 @@ async def admin_action_music_ikb(music_id: int):
                 ).pack(),
             ),
             types.InlineKeyboardButton(
+                text=_("✏️ Tahrirlash"),
+                callback_data=MusicActionCallbackFactory(
+                    action="edit", value=music_id
+                ).pack(),
+            ),
+            types.InlineKeyboardButton(
                 text=_("❌ O'chirish"),
                 callback_data=MusicActionCallbackFactory(
                     action="delete", value=music_id
