@@ -1,6 +1,9 @@
+import os
 import sys
+import uuid
 
 from aiogram import Router, types, F
+from aiogram.enums import ChatAction
 from aiogram.filters import Command, or_f
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.i18n import gettext as _
@@ -16,7 +19,7 @@ from bot.keyboards.base_keyboard import paginated_musics_ikb, paginated_purchase
 from bot.models import Music, Purchase
 from bot.pagination import apply_pagination, calculate_start
 from bot.states.admin_states import AddMusicState, SearchMusicState
-from bot.utils import get_file_path, handle_error, size_representation
+from bot.utils import get_file_path, handle_error, size_representation, download_audio
 
 router = Router()
 
@@ -162,6 +165,20 @@ async def admin_upload_music(
     if not message.audio.mime_type.startswith('audio/mpeg'):
         await message.reply("Kechirasiz, faqat MP3 formatidagi qo'shiq fayllariga ruxsat beriladi.")
         return
+
+    # Download the audio file to the local media folder
+    file_id = message.audio.file_id
+    file_name = f"{uuid.uuid4()}.mp3"
+    local_path = os.path.join(settings.MEDIA_ROOT, file_name)
+
+    await message.bot.send_chat_action(
+        chat_id=message.chat.id, action=ChatAction.TYPING
+    )
+
+    try:
+        await download_audio(file_id, local_path)
+    except Exception as e:
+        await message.reply(str(e))
 
     code, path = await get_file_path(message.audio.file_id)
     if code != 200:

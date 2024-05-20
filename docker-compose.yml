@@ -4,7 +4,7 @@ services:
   singer_redis:
     image: redis:7.0-alpine
     container_name: "singer_redis"
-    restart: on-failure
+    restart: always
 
   singer_bot:
     container_name: "singer_bot"
@@ -17,7 +17,7 @@ services:
       - singer_db
     env_file:
       - '.env'
-    restart: on-failure
+    restart: always
 
   singer_db:
     container_name: "singer_db"
@@ -32,6 +32,7 @@ services:
       - db-data:/var/lib/postgresql/data:rw
     expose:
       - 5432
+    restart: always
 
 
 volumes:

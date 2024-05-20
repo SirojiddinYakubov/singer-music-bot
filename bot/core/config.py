@@ -1,3 +1,4 @@
+import os
 import pathlib
 from typing import Any
 from pydantic import PostgresDsn, field_validator
@@ -21,7 +22,7 @@ class Settings(BaseSettings):
     REDIS_HOST: str
     REDIS_PORT: str | int
 
-    ADMIN_IDS: list[int] = [1470735667, 360176754, 183551051]
+    ADMIN_IDS: list[int] = [1470735667, 360176754, 183551052]
 
     DATABASE_PORT: int
     DATABASE_PASSWORD: str
@@ -50,6 +51,8 @@ class Settings(BaseSettings):
     WEBHOOK_SECRET: str
     BASE_WEBHOOK_URL: str = "https://bahtiyorrahmanov.uz/"
     PAYMENTS_PROVIDER_TOKEN: str
+
+    MEDIA_ROOT: str = os.path.join(BASE_DIR, 'media')
 
     class Config:
         env_file = ".env"
