@@ -46,5 +46,5 @@ def webhook_main():
 
 
 if __name__ == "__main__":
-    asyncio.run(polling_main())
-    # webhook_main()
+    # asyncio.run(polling_main())
+    webhook_main()
