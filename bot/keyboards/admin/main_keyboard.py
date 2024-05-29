@@ -7,7 +7,7 @@ from bot.callbacks import MusicActionCallbackFactory
 def admin_menu_kb():
     kb = [
         [types.KeyboardButton(text=_("🎶 Qo'shiqlar ro'yhati"))],
-        [types.KeyboardButton(text=_("🔎 Qo'shiq izlash"))],
+        # [types.KeyboardButton(text=_("🔎 Qo'shiq izlash"))],
         [
             types.KeyboardButton(text=_("➕ Qo'shiq qo'shish")),
         ],
