@@ -1,6 +1,7 @@
+import os
 import sys
 from aiogram import Router, types, F
-from aiogram.enums import ContentType
+from aiogram.enums import ContentType, ChatAction
 from aiogram.filters import Command, or_f
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.i18n import gettext as _
@@ -150,47 +151,61 @@ async def guest_callbacks_for_music(
         session: AsyncSession,
         state: FSMContext,
 ):
-    music_id = callback_data.value
-    query = select(Music).where(Music.id == music_id, Music.is_active.is_(True))
-    response = await session.execute(query)
-    db_music = response.scalar_one_or_none()
+    try:
+        music_id = callback_data.value
+        query = select(Music).where(Music.id == music_id, Music.is_active.is_(True))
+        response = await session.execute(query)
+        db_music = response.scalar_one_or_none()
 
-    query = select(Purchase).where(
-        Purchase.user_id == callback.from_user.id, Purchase.music_id == music_id
-    )
-    response = await session.execute(query)
-    purchase = response.scalar_one_or_none()
-    if purchase:
-        audio_file_id = db_music.file_id
-        try:
-            return await callback.message.answer_audio(audio=audio_file_id, protect_content=True)
-        except Exception as e:
-            return await handle_error(
-                f"Error sending audio in '{__file__}'\nLinenumer: {sys._getframe().f_lineno}\nException: {e}",
-                e,
+        query = select(Purchase).where(
+            Purchase.user_id == callback.from_user.id, Purchase.music_id == music_id
+        )
+        response = await session.execute(query)
+        purchase = response.scalar_one_or_none()
+        if purchase:
+            await callback.message.bot.send_chat_action(
+                chat_id=callback.message.chat.id, action=ChatAction.UPLOAD_DOCUMENT
+            )
+            file_path = os.path.join(settings.MEDIA_ROOT, db_music.path)
+
+            if not os.path.exists(file_path):
+                raise Exception(
+                    f"Audio file not found in '{__file__}'\nLinenumer: {sys._getframe().f_lineno}"
+                )
+            # audio_file_id = db_music.file_id
+            return await callback.message.reply_audio(
+                audio=types.FSInputFile(
+                    path=file_path,
+                    filename=db_music.title
+                ),
+                protect_content=True
             )
 
-    if not db_music:
-        await callback.message.answer(_("Qo'shiq topilmadi!"))
-        return
-    music_price = db_music.price * 100
-    await callback.message.bot.send_invoice(
-        callback.message.chat.id,
-        title=db_music.title,
-        description="{music_title} !".format(music_title=db_music.title),
-        provider_token=settings.PAYMENTS_PROVIDER_TOKEN,
-        currency='UZS',
-        # photo_url="https://www.gstatic.com/webp/gallery/1.jpg",
-        # photo_height=512,  # !=0/None, иначе изображение не покажется
-        # photo_width=512,
-        # photo_size=512,
-        is_flexible=False,  # True если конечная цена зависит от способа доставки
-        prices=[types.LabeledPrice(label='Narxi', amount=music_price)],
-        start_parameter='time-machine-example',
-        payload=PaymentInfoFactory(user_id=callback.from_user.id, music_id=music_id,
-                                   amount=music_price).pack(),
-    )
-    await callback.answer()
+            # return await callback.message.answer_audio(audio=audio_file_id, protect_content=True)
+
+        if not db_music:
+            await callback.message.answer(_("Qo'shiq topilmadi!"))
+            return
+        music_price = db_music.price * 100
+        await callback.message.bot.send_invoice(
+            callback.message.chat.id,
+            title=db_music.title,
+            description="{music_title} !".format(music_title=db_music.title),
+            provider_token=settings.PAYMENTS_PROVIDER_TOKEN,
+            currency='UZS',
+            # photo_url="https://www.gstatic.com/webp/gallery/1.jpg",
+            # photo_height=512,  # !=0/None, иначе изображение не покажется
+            # photo_width=512,
+            # photo_size=512,
+            is_flexible=False,  # True если конечная цена зависит от способа доставки
+            prices=[types.LabeledPrice(label='Narxi', amount=music_price)],
+            start_parameter='time-machine-example',
+            payload=PaymentInfoFactory(user_id=callback.from_user.id, music_id=music_id,
+                                       amount=music_price).pack(),
+        )
+        await callback.answer()
+    except Exception as e:
+        await callback.message.answer(str(e))
 
 
 @router.pre_checkout_query(~IsAdmin())
@@ -201,27 +216,39 @@ async def process_pre_checkout_query(pre_checkout_query: types.PreCheckoutQuery)
 
 @router.message(F.content_type == ContentType.SUCCESSFUL_PAYMENT, ~IsAdmin())
 async def process_successful_payment(message: types.Message, session: AsyncSession):
-    print('successful_payment:', message.successful_payment)
-    payload = PaymentInfoFactory.unpack(message.successful_payment.invoice_payload)
-    print(payload)
-    purchase = Purchase(user_id=payload.user_id, music_id=payload.music_id, amount=payload.amount / 100)
-    session.add(purchase)
-    await session.commit()
+    try:
+        print('successful_payment:', message.successful_payment)
+        payload = PaymentInfoFactory.unpack(message.successful_payment.invoice_payload)
+        print(payload)
+        purchase = Purchase(user_id=payload.user_id, music_id=payload.music_id, amount=payload.amount / 100)
+        session.add(purchase)
+        await session.commit()
 
-    query = select(Music).where(Music.id == payload.music_id, Music.is_active.is_(True))
-    response = await session.execute(query)
-    db_music = response.scalar_one_or_none()
-    if db_music:
-        audio_file_id = db_music.file_id
-        try:
-            await message.answer_audio(audio=audio_file_id, protect_content=True)
-        except Exception as e:
-            await handle_error(
-                f"Error sending audio in '{__file__}'\nLinenumer: {sys._getframe().f_lineno}\nException: {e}",
-                e,
+        query = select(Music).where(Music.id == payload.music_id, Music.is_active.is_(True))
+        response = await session.execute(query)
+        db_music = response.scalar_one_or_none()
+        if db_music:
+            await message.bot.send_chat_action(
+                chat_id=message.chat.id, action=ChatAction.UPLOAD_DOCUMENT
             )
-    else:
-        await handle_error(
-            f"Music with id {payload.music_id} not found in '{__file__}'\nLinenumer: {sys._getframe().f_lineno}"
-        )
-        await message.answer(_("Qo'shiq topilmadi!"))
+            file_path = os.path.join(settings.MEDIA_ROOT, db_music.path)
+
+            if not os.path.exists(file_path):
+                raise Exception(
+                    f"Audio file not found in '{__file__}'\nLinenumer: {sys._getframe().f_lineno}"
+                )
+            return await message.reply_audio(
+                audio=types.FSInputFile(
+                    path=file_path,
+                    filename=db_music.title
+                ),
+                protect_content=True
+            )
+
+        else:
+            await handle_error(
+                f"Music with id {payload.music_id} not found in '{__file__}'\nLinenumer: {sys._getframe().f_lineno}"
+            )
+            await message.answer(_("Qo'shiq topilmadi!"))
+    except Exception as e:
+        await message.answer(str(e))
